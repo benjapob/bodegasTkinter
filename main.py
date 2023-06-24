@@ -12,6 +12,9 @@ from tkinter.filedialog import askdirectory
 # Import DTO
 from dto.dto_tr import TrDTO
 from dto.dto_editorial import EditorialDTO
+from dto.dto_bodega import BodegaDTO
+from dto.dto_producto import ProductoDTO
+from dto.dto_categoria import CategoriaDTO
 
 
 # Funciones tkinter
@@ -139,6 +142,80 @@ def deleteEditorial(numero):
 def findEditorial(numero):
     "Busca una editorial por su numero"
     resultado = EditorialDTO().findEditorial(numero)
+    return resultado
+
+
+def findEditorialId(nombre):
+    "Busca un Editorial por su nombre"
+    resultado = EditorialDTO().findEditorialId(nombre)
+    return resultado
+
+
+# Funciones DTO-DAO Bodega
+def createBodega(numero, capacidad):
+    """Crea una Bodega con un numero y una capacidad
+    después irá a la base de datos y creara la Bodega"""
+
+    resultado = BodegaDTO().createBodega(numero, capacidad)
+    return resultado
+
+
+def listBodega():
+    resultado = BodegaDTO().listBodega()
+    return resultado
+
+
+def deleteBodega(numero):
+    "Elimina una Bodega por su numero"
+    resultado = BodegaDTO().deleteBodega(numero)
+    return resultado
+
+
+def findBodega(numero):
+    "Busca una Bodega por su numero"
+    resultado = BodegaDTO().findBodega(numero)
+    return resultado
+
+
+# Funciones DTO-DAO Producto
+def createProducto(numero, nombre, desc, autor, editorial, categoria):
+    """Crea un Producto con un numero y una capacidad
+    después irá a la base de datos y creara la Producto"""
+
+    resultado = ProductoDTO().createProducto(
+        numero, nombre, desc, autor, editorial, categoria
+    )
+    return resultado
+
+
+def listProducto():
+    resultado = ProductoDTO().listProducto()
+    return resultado
+
+
+def deleteProducto(numero):
+    "Elimina un Producto por su numero"
+    resultado = ProductoDTO().deleteProducto(numero)
+    return resultado
+
+
+def findProducto(numero):
+    "Busca un Bodega por su numero"
+    resultado = BodegaDTO().findBodega(numero)
+    return resultado
+
+
+# Funciones DTO-DAO Categoria
+
+
+def listCategoria():
+    resultado = CategoriaDTO().listCategoria()
+    return resultado
+
+
+def findCategoriaId(nombre):
+    "Busca un Categoria por su nombre"
+    resultado = CategoriaDTO().findCategoria(nombre)
     return resultado
 
 
@@ -371,6 +448,14 @@ class CreateProducto(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent, padx=20, pady=10)
 
+        listaEditorial = []
+        for a in listEditorial().values():
+            listaEditorial.append(a.getNombre())
+
+        listaCategoria = []
+        for a in listCategoria().values():
+            listaCategoria.append(a.getNombre())
+
         # form variables
         self.id = ttk.StringVar(value="")
         self.nombre = ttk.StringVar(value="")
@@ -389,10 +474,15 @@ class CreateProducto(tk.Toplevel):
         self.create_form_entry("nombre", self.nombre, validarStr)
         self.create_form_entry("descripcion", self.desc, validarStr)
         self.create_form_entry("autor", self.autor, validarStr)
-        self.create_form_entry_combo("categoria", self.categoria, validarStr)
-        self.create_form_entry_combo("editorial", self.editorial, validarStr)
+        self.create_form_entry_combo(
+            "categoria", self.categoria, validarStr, listaCategoria
+        )
+        self.create_form_entry_combo(
+            "editorial", self.editorial, validarStr, listaEditorial
+        )
         self.create_buttonbox()
         self.create_results_view()
+        self.update_results_view()
 
     def create_form_entry(self, label, variable, val):
         # Crear una entrada
@@ -410,8 +500,9 @@ class CreateProducto(tk.Toplevel):
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
 
-    def create_form_entry_combo(self, label, variable, val):
+    def create_form_entry_combo(self, label, variable, val, list):
         # Crear una entrada
+
         container = ttk.Frame(self.option_lf)
         container.pack(fill=X, expand=YES, pady=5)
 
@@ -423,7 +514,7 @@ class CreateProducto(tk.Toplevel):
             textvariable=variable,
             validate="focus",
             validatecommand=(self.register(val), "%P"),
-            values=[],
+            values=list,
             state=READONLY,
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
@@ -461,39 +552,59 @@ class CreateProducto(tk.Toplevel):
         self.resultview.column(column=3, anchor=W, stretch=False)
         self.resultview.column(column=4, anchor=W, stretch=False)
 
-        # insert falso
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listProducto().values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
 
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-
-        self.resultview.item(
-            iid,
-            open=True,
-            values=[
-                1,
-                "El principito",
-                "Antoine De Saint-Exupéry",
-                "Salamandra",
-                "Libro",
-            ],
-        )
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a.getNumero(),
+                    a.getNombre(),
+                    a.getAutor(),
+                    a.getEditorial(),
+                    a.getCategoria(),
+                ],
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createProducto()
-        id = "1"
+        id = self.id.get()
         nombre = self.nombre.get()
         desc = self.desc.get()
         autor = self.autor.get()
-        editorial = self.editorial.get()
         categoria = self.categoria.get()
+        editorial = self.editorial.get()
+        print(id, nombre, desc, autor, categoria, editorial)
+        if (
+            validarInt(id)
+            and validarStr(nombre)
+            and validarStr(desc)
+            and validarStr(autor)
+            and validarStr(categoria)
+            and validarStr(editorial)
+        ):
+            categoria = findCategoriaId(categoria)
+            editorial = findEditorialId(editorial)
+            mensaje = createProducto(id, nombre, desc, autor, categoria, editorial)
+            self.update_results_view()
 
-        Messagebox.show_info(
-            title="Aviso",
-            message=f"Producto Creado:\nId: {id} \nNombre: {nombre}",
-            parent=self,
-        )
+            submit(self, mensaje)
+            self.id = ttk.StringVar(value="")
+            self.nombre = ttk.StringVar(value="")
+            self.desc = ttk.StringVar(value="")
+            self.autor = ttk.StringVar(value="")
+            self.editorial = ttk.StringVar(value="")
+            self.categoria = ttk.StringVar(value="")
+
+        else:
+            datosValidos(self)
 
 
 class CreateBodega(tk.Toplevel):
@@ -509,10 +620,11 @@ class CreateBodega(tk.Toplevel):
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
         # form entries
-        self.create_form_entry("numero", self.numero, validarInt)
+        self.create_form_entry("id", self.numero, validarInt)
         self.create_form_entry("capacidad", self.capacidad, validarInt)
         self.create_buttonbox()
         self.create_results_view()
+        self.update_results_view()
 
     def create_form_entry(self, label, variable, val):
         # Crear una entrada
@@ -557,26 +669,34 @@ class CreateBodega(tk.Toplevel):
         self.resultview.column(column=0, anchor=W, stretch=False)
         self.resultview.column(column=1, anchor=W, stretch=False)
 
-        # insert falso
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listBodega().values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
 
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-
-        self.resultview.item(iid, open=True, values=[1, 200])
+            self.resultview.item(
+                iid, open=True, values=[a.getNumero(), a.getCapacidad()]
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createBodega()
-        id = "1"
         numero = self.numero.get()
         capacidad = self.capacidad.get()
 
-        Messagebox.show_info(
-            title="Aviso",
-            message=f"Bodega Creada:\nId: {id} \nNumero: {numero}",
-            parent=self,
-        )
+        if validarInt(numero) and validarInt(capacidad):
+            mensaje = createBodega(numero, capacidad)
+            self.update_results_view()
+
+            submit(self, mensaje)
+            self.numero = ttk.StringVar(value="")
+            self.capacidad = ttk.StringVar(value="")
+
+        else:
+            datosValidos(self)
 
 
 class CreateEditorial(tk.Toplevel):
@@ -665,6 +785,8 @@ class CreateEditorial(tk.Toplevel):
             self.update_results_view()
 
             submit(self, mensaje)
+            self.numero = ttk.StringVar(value="")
+            self.nombre = ttk.StringVar(value="")
 
         else:
             datosValidos(self)
@@ -768,16 +890,13 @@ class DelBodega(tk.Toplevel):
         self.id = ttk.StringVar(value="")
 
         # header and labelframe option container
-        option_text = "Eliminar por Id"
+        option_text = "Eliminar Bodega por Id"
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
         self.create_term_row()
         self.create_results_view()
-
-        # form entries
-        # self.create_form_entry("id", self.id, validarStr)
-        # self.create_buttonbox()
+        self.update_results_view()
 
     def create_term_row(self):
         """Add term row to labelframe"""
@@ -825,15 +944,38 @@ class DelBodega(tk.Toplevel):
 
         self.resultview.item(iid, open=True, values=[1, 2, 300])
 
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listBodega().values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
+
+            self.resultview.item(
+                iid, open=True, values=[a.getNumero(), a.getCapacidad()]
+            )
+
     def on_submit(self):
         # Valida las entradas y llama la función delProducto()
-        id = "1"
+        if validarInt(self.id.get()):
+            buscar = findBodega(self.id.get())
+            if buscar:
+                mensajeResp = f"Estás a punto de eliminar la Bodega:\nId: {buscar.getNumero()}\nCapacidad: {buscar.getCapacidad()}\n ¿Estás seguro?"
+                resp = pregunta(self, mensajeResp)
+                if resp == "Si":
+                    mensaje = deleteBodega(self.id.get())
+                    self.update_results_view()
+                elif resp == "No":
+                    mensaje = "No se realizaron cambios"
+            else:
+                mensaje = f"No se pudo encontrar la Bodega"
 
-        Messagebox.show_info(
-            title="Aviso",
-            message=f"Bodega Eliminada:\nId: {id}",
-            parent=self,
-        )
+            submit(self, mensaje)
+            self.id = ttk.StringVar(value="")
+        else:
+            datosValidos(self)
 
 
 class DelEditorial(tk.Toplevel):
@@ -844,7 +986,7 @@ class DelEditorial(tk.Toplevel):
         self.id = ttk.StringVar(value="")
 
         # header and labelframe option container
-        option_text = "Eliminar por Id"
+        option_text = "Eliminar Editorial por Id"
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
@@ -896,7 +1038,9 @@ class DelEditorial(tk.Toplevel):
                 index=END,
             )
 
-            self.resultview.item(iid, open=True, values=[a.getNumero(), a.getNombre()])
+            self.resultview.item(
+                iid, open=True, values=[a.getNumero(), a.getNombre().capitalize()]
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función deleteEditorial()
@@ -915,6 +1059,7 @@ class DelEditorial(tk.Toplevel):
             else:
                 mensaje = f"No se pudo encontrar la editorial"
                 submit(self, mensaje)
+            self.id = ttk.StringVar(value="")
         else:
             datosValidos(self)
 

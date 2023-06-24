@@ -3,7 +3,7 @@ class Producto:
     def __init__(
         self,
         id="",
-        sku="",
+        numero="",
         nombre="",
         descripcion="",
         autor="",
@@ -11,7 +11,7 @@ class Producto:
         categoria="",
     ):
         self.__id = id
-        self.__sku = sku
+        self.__numero = numero
         self.__nombre = nombre
         self.__descripcion = descripcion
         self.__autor = autor
@@ -21,14 +21,14 @@ class Producto:
     # Funcion str para hacer print al objeto
 
     def __str__(self) -> str:
-        return f"{self.__id} {self.__sku} {self.__nombre} {self.__descripcion} {self.__autor} {self.__editorial} {self.__categoria}"
+        return f"{self.__id} {self.__numero} {self.__nombre} {self.__descripcion} {self.__autor} {self.__editorial} {self.__categoria}"
 
     # Getters
     def getId(self):
         return self.__id
 
-    def getSku(self):
-        return self.__sku
+    def getNumero(self):
+        return self.__numero
 
     def getNombre(self):
         return self.__nombre
@@ -49,8 +49,8 @@ class Producto:
     def setId(self, id):
         self.__id = id
 
-    def setSku(self, sku):
-        self.__sku = sku
+    def setNumero(self, numero):
+        self.__numero = numero
 
     def setNombre(self, nombre):
         self.__nombre = nombre

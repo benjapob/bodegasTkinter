@@ -1,9 +1,9 @@
 from conex import conn
-from modelo.editorial import Editorial
+from modelo.bodega import Bodega
 import traceback
 
 
-class DaoEditorial:
+class DaoBodega:
     def __init__(self):
         try:
             self.conn = conn.Conex("localhost", "root", "", "proyectoInventario")
@@ -13,10 +13,10 @@ class DaoEditorial:
     def getConex(self):
         return self.conn
 
-    def addEditorial(self, editorial):
-        sql = "insert into editorial values (null,%s, %s)"
-        nombre = editorial.getNombre()
-        numero = editorial.getNumero()
+    def addBodega(self, bodega):
+        sql = "insert into bodega values (null,%s, %s, 1)"
+        numero = bodega.getNumero()
+        capacidad = bodega.getCapacidad()
         c = self.getConex()
         mensaje = ""
         try:
@@ -24,17 +24,15 @@ class DaoEditorial:
             cursor.execute(
                 sql,
                 (
+                    capacidad,
                     numero,
-                    nombre,
                 ),
             )
             c.getConex().commit()
             filas = cursor.rowcount
 
             if filas > 0:
-                mensaje = (
-                    f"Editorial Creada:\nId: {numero}\nNombre: {nombre.capitalize()}"
-                )
+                mensaje = f"Bodega Creada:\nId: {numero}"
             else:
                 mensaje = "No se realizaron cambios"
 
@@ -51,16 +49,16 @@ class DaoEditorial:
                 c.closeConex()
         return mensaje
 
-    def listEditorial(self):
+    def listBodega(self):
         c = self.getConex()
         lista = {}
         try:
             cursor = c.getConex().cursor()
-            cursor.execute("select numeroEditorial, nombreEditorial from editorial")
+            cursor.execute("select numerobodega, capacidadBodega from bodega")
             resultado = cursor.fetchall()
             if resultado is not None:
                 for a in resultado:
-                    e = Editorial(numero=a[0], nombre=a[1].capitalize())
+                    e = Bodega(numero=a[0], capacidad=a[1])
                     lista[a[0]] = e
         except Exception as ex:
             print(traceback.print_exc())
@@ -69,18 +67,18 @@ class DaoEditorial:
                 c.closeConex()
         return lista
 
-    def deleteEditorial(self, editorial):
-        sql = "delete from editorial where numeroEditorial = %s"
+    def deleteBodega(self, bodega):
+        sql = "delete from bodega where numerobodega = %s"
         mensaje = ""
         c = self.getConex()
 
         try:
             cursor = c.getConex().cursor()
-            cursor.execute(sql, (editorial.getNumero(),))
+            cursor.execute(sql, (bodega.getNumero(),))
             c.getConex().commit()
             filas = cursor.rowcount
             if filas > 0:
-                mensaje = f"Editorial Eliminada:\nId: {editorial.getNumero()}"
+                mensaje = f"Bodega Eliminada:\nId: {bodega.getNumero()}"
             else:
                 mensaje = "No se realizaron cambios"
 
@@ -88,7 +86,7 @@ class DaoEditorial:
             print(traceback.print_exc())
             ex = str(ex)
             if ex.startswith("1451"):
-                mensaje = "La editorial está en uso\nNo se realizaron cambios"
+                mensaje = "La bodega está en uso\nNo se realizaron cambios"
             else:
                 mensaje = "Problemas con la base de datos..vuelva a intentarlo"
         finally:
@@ -96,37 +94,18 @@ class DaoEditorial:
                 c.closeConex()
         return mensaje
 
-    def findEditorial(self, editorial):
+    def findBodega(self, bodega):
         c = self.getConex()
         resultado = None
         try:
             cursor = c.getConex().cursor()
             cursor.execute(
-                f"select numeroEditorial, nombreEditorial from editorial where numeroEditorial = {editorial.getNumero()}"
+                f"select numerobodega, capacidadbodega from bodega where numerobodega = {bodega.getNumero()}"
             )
             resultado = cursor.fetchall()
             if resultado is not None:
                 for a in resultado:
-                    resultado = Editorial(numero=a[0], nombre=a[1].capitalize())
-        except Exception as ex:
-            print(traceback.print_exc())
-        finally:
-            if c.getConex().is_connected():
-                c.closeConex()
-        return resultado
-
-    def findEditorialId(self, editorial):
-        c = self.getConex()
-        resultado = None
-        try:
-            cursor = c.getConex().cursor()
-            cursor.execute(
-                f"select idEditorial, nombreEditorial from editorial where nombreEditorial = '{editorial.getNombre()}'"
-            )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Editorial(id=a[0], nombre=a[1].capitalize())
+                    resultado = Bodega(numero=a[0], capacidad=a[1])
         except Exception as ex:
             print(traceback.print_exc())
         finally:

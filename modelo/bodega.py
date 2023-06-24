@@ -1,9 +1,9 @@
 class Bodega:
     # Constructor
-    def __init__(self, id="", capacidad="", num="", trabajador=""):
+    def __init__(self, id="", capacidad="", numero="", trabajador=""):
         self.__id = id
         self.__capacidad = capacidad
-        self.__num = num
+        self.__numero = numero
 
         self.__trabajador = trabajador
 
@@ -19,8 +19,8 @@ class Bodega:
     def getCapacidad(self):
         return self.__capacidad
 
-    def getNum(self):
-        return self.__num
+    def getNumero(self):
+        return self.__numero
 
     def getTrabajador(self):
         return self.__trabajador
@@ -32,8 +32,8 @@ class Bodega:
     def setCapacidad(self, capacidad):
         self.__capacidad = capacidad
 
-    def setNum(self, num):
-        self.__num = num
+    def setNumero(self, numero):
+        self.__numero = numero
 
     def setTrabajador(self, trabajador):
         self.__trabajador = trabajador

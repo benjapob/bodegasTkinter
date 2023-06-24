@@ -24,3 +24,8 @@ class EditorialDTO:
         daoEditorial = DaoEditorial()
         resultado = daoEditorial.findEditorial(Editorial(numero=numero))
         return resultado if resultado is not None else None
+
+    def findEditorialId(self, nombre):
+        daoEditorial = DaoEditorial()
+        resultado = daoEditorial.findEditorialId(Editorial(nombre=nombre))
+        return resultado.getId() if resultado is not None else None
