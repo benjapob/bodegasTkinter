@@ -32,12 +32,14 @@ class DaoEditorial:
             filas = cursor.rowcount
 
             if filas > 0:
-                mensaje = f"Editorial Creada:\nNumero: {numero.capitalize()}\nNombre: {nombre.capitalize()}"
+                mensaje = (
+                    f"Editorial Creada:\nId: {numero}\nNombre: {nombre.capitalize()}"
+                )
             else:
                 mensaje = "No se realizaron cambios"
 
         except Exception as ex:
-            # print(traceback.print_exc())
+            print(traceback.print_exc())
             ex = str(ex)
 
             if ex.startswith("1062"):
@@ -49,30 +51,7 @@ class DaoEditorial:
                 c.closeConex()
         return mensaje
 
-    def eliminarEditorial(self, Editorial):
-        sql = "delete from Editorial where numeroEditorial = %s"
-        mensaje = ""
-        c = self.getConex()
-
-        try:
-            cursor = c.getConex().cursor()
-            cursor.execute(sql, (Editorial.getIdenticaEditorial(),))
-            c.getConex().commit()
-            filas = cursor.rowcount
-            if filas > 0:
-                mensaje = "Mensaje"
-            else:
-                mensaje = "No se realizaron cambios"
-
-        except Exception as ex:
-            print(traceback.print_exc())
-            mensaje = "Problemas con la base de datos..vuelva a intentarlo"
-        finally:
-            if c.getConex().is_connected():
-                c.closeConex()
-        return mensaje
-
-    def listarEditorial(self):
+    def listEditorial(self):
         c = self.getConex()
         lista = {}
         try:
@@ -89,3 +68,49 @@ class DaoEditorial:
             if c.getConex().is_connected():
                 c.closeConex()
         return lista
+
+    def deleteEditorial(self, editorial):
+        sql = "delete from editorial where numeroEditorial = %s"
+        mensaje = ""
+        c = self.getConex()
+
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(sql, (editorial.getNumero(),))
+            c.getConex().commit()
+            filas = cursor.rowcount
+            if filas > 0:
+                mensaje = f"Editorial Eliminada:\nId: {editorial.getNumero()}"
+            else:
+                mensaje = "No se realizaron cambios"
+
+        except Exception as ex:
+            print(traceback.print_exc())
+            ex = str(ex)
+            if ex.startswith("1451"):
+                mensaje = "La editorial está en uso\nNo se realizaron cambios"
+            else:
+                mensaje = "Problemas con la base de datos..vuelva a intentarlo"
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return mensaje
+
+    def findEditorial(self, editorial):
+        c = self.getConex()
+        resultado = None
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(
+                f"select numeroEditorial, nombreEditorial from editorial where numeroEditorial = {editorial.getNumero()}"
+            )
+            resultado = cursor.fetchall()
+            if resultado is not None:
+                for a in resultado:
+                    resultado = Editorial(numero=a[0], nombre=a[1])
+        except Exception as ex:
+            print(traceback.print_exc())
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return resultado

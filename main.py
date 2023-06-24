@@ -94,7 +94,20 @@ def datosValidos(self):
     )
 
 
-# Funciones DTO-DAO
+def submit(self, mensaje):
+    Messagebox.show_info(
+        title="Aviso",
+        message=mensaje,
+        parent=self,
+    )
+
+
+def pregunta(self, mensaje):
+    resp = Messagebox.show_question(message=mensaje, parent=self, buttons=["No", "Si"])
+    return resp
+
+
+# Funciones DTO-DAO Login
 def validarLogin(correo, contraseña):
     """Valida el login con un correo y contraseña,
     después irá a la base de datos y buscará un usuario"""
@@ -103,17 +116,29 @@ def validarLogin(correo, contraseña):
     return resultado
 
 
-# Funciones DTO-DAO
-def createEditorial(id, nombre):
-    """Crea una editorial con un id y un nombre
+# Funciones DTO-DAO Editorial
+def createEditorial(numero, nombre):
+    """Crea una editorial con un numero y un nombre
     después irá a la base de datos y creara la editorial"""
 
-    resultado = EditorialDTO().createEditorial(id, nombre)
+    resultado = EditorialDTO().createEditorial(numero, nombre)
     return resultado
 
 
-def listarEditorial():
-    resultado = EditorialDTO().listarEditorial()
+def listEditorial():
+    resultado = EditorialDTO().listEditorial()
+    return resultado
+
+
+def deleteEditorial(numero):
+    "Elimina una editorial por su numero"
+    resultado = EditorialDTO().deleteEditorial(numero)
+    return resultado
+
+
+def findEditorial(numero):
+    "Busca una editorial por su numero"
+    resultado = EditorialDTO().findEditorial(numero)
     return resultado
 
 
@@ -360,7 +385,7 @@ class CreateProducto(tk.Toplevel):
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
         # form entries
-        self.create_form_entry("id", self.id, validarStr)
+        self.create_form_entry("id", self.id, validarInt)
         self.create_form_entry("nombre", self.nombre, validarStr)
         self.create_form_entry("descripcion", self.desc, validarStr)
         self.create_form_entry("autor", self.autor, validarStr)
@@ -559,7 +584,7 @@ class CreateEditorial(tk.Toplevel):
         super().__init__(parent, padx=20, pady=10)
 
         # form variables
-        self.id = ttk.StringVar(value="")
+        self.numero = ttk.StringVar(value="")
         self.nombre = ttk.StringVar(value="")
 
         # header and labelframe option container
@@ -568,7 +593,7 @@ class CreateEditorial(tk.Toplevel):
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
         # form entries
-        self.create_form_entry("id", self.id, validarStr)
+        self.create_form_entry("numero", self.numero, validarInt)
         self.create_form_entry("nombre", self.nombre, validarStr)
         self.create_buttonbox()
         self.create_results_view()
@@ -620,28 +645,26 @@ class CreateEditorial(tk.Toplevel):
     def update_results_view(self):
         for item in self.resultview.get_children():
             self.resultview.delete(item)
-        for a in listarEditorial().values():
+        for a in listEditorial().values():
             iid = self.resultview.insert(
                 parent="",
                 index=END,
             )
 
-            self.resultview.item(iid, open=True, values=[a.getNumero(), a.getNombre()])
+            self.resultview.item(
+                iid, open=True, values=[a.getNumero(), a.getNombre().capitalize()]
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createEditorial()
-        id = self.id.get()
+        numero = self.numero.get()
         nombre = self.nombre.get()
 
-        if validarStr(nombre) and validarStr(id):
-            mensaje = createEditorial(id, nombre)
+        if validarStr(numero) and validarStr(nombre):
+            mensaje = createEditorial(numero, nombre)
             self.update_results_view()
 
-            Messagebox.show_info(
-                title="Aviso",
-                message=mensaje,
-                parent=self,
-            )
+            submit(self, mensaje)
 
         else:
             datosValidos(self)
@@ -827,10 +850,7 @@ class DelEditorial(tk.Toplevel):
 
         self.create_term_row()
         self.create_results_view()
-
-        # form entries
-        # self.create_form_entry("id", self.id, validarStr)
-        # self.create_buttonbox()
+        self.update_results_view()
 
     def create_term_row(self):
         """Add term row to labelframe"""
@@ -867,24 +887,36 @@ class DelEditorial(tk.Toplevel):
         self.resultview.column(column=0, anchor=W, stretch=False)
         self.resultview.column(column=1, anchor=W, stretch=False)
 
-        # insert falso
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listEditorial().values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
 
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-
-        self.resultview.item(iid, open=True, values=[1, "Salamanca"])
+            self.resultview.item(iid, open=True, values=[a.getNumero(), a.getNombre()])
 
     def on_submit(self):
-        # Valida las entradas y llama la función delProducto()
-        id = "1"
-
-        Messagebox.show_info(
-            title="Aviso",
-            message=f"Editorial Eliminada:\nId: {id}",
-            parent=self,
-        )
+        # Valida las entradas y llama la función deleteEditorial()
+        if validarInt(self.id.get()):
+            buscar = findEditorial(self.id.get())
+            if buscar:
+                mensaje = f"Estás a punto de eliminar la editorial:\nId: {buscar.getNumero()}\nNombre: {buscar.getNombre()}\n ¿Estás seguro?"
+                resp = pregunta(self, mensaje)
+                if resp == "Si":
+                    mensaje = deleteEditorial(self.id.get())
+                    self.update_results_view()
+                    submit(self, mensaje)
+                elif resp == "No":
+                    mensaje = "No se realizaron cambios"
+                    submit(self, mensaje)
+            else:
+                mensaje = f"No se pudo encontrar la editorial"
+                submit(self, mensaje)
+        else:
+            datosValidos(self)
 
 
 class UpdateProducto(tk.Toplevel):

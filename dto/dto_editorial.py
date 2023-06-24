@@ -3,32 +3,24 @@ from dao.dao_editorial import DaoEditorial
 
 
 class EditorialDTO:
-    def listarEditorial(self):
+    def listEditorial(self):
         daoEditorial = DaoEditorial()
-        resu = daoEditorial.listarEditorial()
+        resu = daoEditorial.listEditorial()
         return resu
 
-    def createEditorial(self, id, nombre):
+    def createEditorial(self, numero, nombre):
         daoEditorial = DaoEditorial()
         resultado = daoEditorial.addEditorial(
-            Editorial(nombre=nombre.upper(), numero=id.upper())
+            Editorial(nombre=nombre.upper(), numero=numero)
         )
         return resultado
 
-    """ def eliminarEditorial(self, numero):
-        existe = self.buscarEditorial(numero)
-        activo = self.activoEditorial(numero)
-        if existe is not None and len(activo) == 0:
-            conf = input(
-                f"¿Estás seguro que quieres eliminar el Editorial {existe.getDescripcionEditorial()}? (Escribe s para confirmar): "
-            )
-            if conf == "s":
-                daoEditorial = daoEditorial()
-                resultado = daoEditorial.eliminarEditorial(Editorial(numero))
-                return resultado
-            else:
-                resultado = "No se realizaron cambios"
-                return resultado
-        else:
-            resultado = "Editorial no existe o está en uso"
-            return resultado """
+    def deleteEditorial(self, numero):
+        daoEditorial = DaoEditorial()
+        resultado = daoEditorial.deleteEditorial(Editorial(numero=numero))
+        return resultado
+
+    def findEditorial(self, numero):
+        daoEditorial = DaoEditorial()
+        resultado = daoEditorial.findEditorial(Editorial(numero=numero))
+        return resultado if resultado is not None else None
