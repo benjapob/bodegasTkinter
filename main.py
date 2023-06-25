@@ -4,11 +4,6 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 
-import datetime
-import pathlib
-from threading import Thread
-from tkinter.filedialog import askdirectory
-
 # Import DTO
 from dto.dto_tr import TrDTO
 from dto.dto_editorial import EditorialDTO
@@ -1339,11 +1334,6 @@ class SearchInfGeneral(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master, padx=20, pady=10)
 
-        # application variables
-        _path = pathlib.Path().absolute().as_posix()
-        self.path_var = ttk.StringVar(value=_path)
-        self.term_var = ttk.StringVar(value="")
-
         # form header
         hdr_txt = "Informe de Movimientos"
         hdr = ttk.Label(master=self, text=hdr_txt, width=50)
@@ -1480,14 +1470,11 @@ class SearchInfBodega(tk.Toplevel):
 
 
 class SearchInfBodegaCont(tk.Toplevel):
-    searching = False
-
     def __init__(self, master):
         super().__init__(master, padx=20, pady=10)
 
         # application variables
-        _path = pathlib.Path().absolute().as_posix()
-        self.path_var = ttk.StringVar(value=_path)
+        self.path_var = ttk.StringVar(value="")
         self.term_var = ttk.StringVar(value="")
 
         # header and labelframe option container
@@ -1550,117 +1537,13 @@ class SearchInfBodegaCont(tk.Toplevel):
             iid, open=True, values=[1, "El Principito", 26, "Libro", "Salamandra"]
         )
 
-    def on_browse(self):
-        """Callback for directory browse"""
-        path = askdirectory(title="Browse directory")
-        if path:
-            self.path_var.set(path)
-
     def on_search(self):
-        """Search for a term based on the search type"""
-        search_term = self.term_var.get()
-        search_path = self.path_var.get()
-        search_type = self.type_var.get()
-
-        if search_term == "":
-            return
-
-        # start search in another thread to prevent UI from locking
-        Thread(
-            target=SearchInfGeneral.file_search,
-            args=(search_term, search_path, search_type),
-            daemon=True,
-        ).start()
-        self.progressbar.start(10)
-
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-        self.resultview.item(iid, open=True)
-        self.after(100, lambda: self.check_queue(iid))
-
-    def insert_row(self, file, iid):
-        """Insert new row in tree search results"""
-        try:
-            _stats = file.stat()
-            _name = file.stem
-            _timestamp = datetime.datetime.fromtimestamp(_stats.st_mtime)
-            _modified = _timestamp.strftime(r"%m/%d/%Y %I:%M:%S%p")
-            _type = file.suffix.lower()
-            _size = SearchInfGeneral.convert_size(_stats.st_size)
-            _path = file.as_posix()
-            iid = self.resultview.insert(
-                parent="", index=END, values=(_name, _modified, _type, _size, _path)
-            )
-            self.resultview.selection_set(iid)
-            self.resultview.see(iid)
-        except OSError:
-            return
-
-    @staticmethod
-    def file_search(term, search_path, search_type):
-        """Recursively search directory for matching files"""
-        SearchInfGeneral.set_searching(1)
-        if search_type == "contains":
-            SearchInfGeneral.find_contains(term, search_path)
-        elif search_type == "startswith":
-            SearchInfGeneral.find_startswith(term, search_path)
-        elif search_type == "endswith":
-            SearchInfGeneral.find_endswith(term, search_path)
-
-    @staticmethod
-    def find_contains(term, search_path):
-        """Find all files that contain the search term"""
-        for path, _, files in pathlib.os.walk(search_path):
-            if files:
-                for file in files:
-                    if term in file:
-                        record = pathlib.Path(path) / file
-                        SearchInfGeneral.queue.put(record)
-        SearchInfGeneral.set_searching(False)
-
-    @staticmethod
-    def find_startswith(term, search_path):
-        """Find all files that start with the search term"""
-        for path, _, files in pathlib.os.walk(search_path):
-            if files:
-                for file in files:
-                    if file.startswith(term):
-                        record = pathlib.Path(path) / file
-                        SearchInfGeneral.queue.put(record)
-        SearchInfGeneral.set_searching(False)
-
-    @staticmethod
-    def find_endswith(term, search_path):
-        """Find all files that end with the search term"""
-        for path, _, files in pathlib.os.walk(search_path):
-            if files:
-                for file in files:
-                    if file.endswith(term):
-                        record = pathlib.Path(path) / file
-                        SearchInfGeneral.queue.put(record)
-        SearchInfGeneral.set_searching(False)
-
-    @staticmethod
-    def set_searching(state=False):
-        """Set searching status"""
-        SearchInfGeneral.searching = state
-
-    @staticmethod
-    def convert_size(size):
-        """Convert bytes to mb or kb depending on scale"""
-        kb = size // 1000
-        mb = round(kb / 1000, 1)
-        if kb > 1000:
-            return f"{mb:,.1f} MB"
-        else:
-            return f"{kb:,d} KB"
+        pass
 
 
 if __name__ == "__main__":
     login = ttk.Window("Librería el Gran Poeta", "superhero", resizable=(False, False))
 
     place_window_center(login)
-    SearchInfGeneral(login)
+    Login(login)
     login.mainloop()
