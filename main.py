@@ -15,6 +15,7 @@ from dto.dto_editorial import EditorialDTO
 from dto.dto_bodega import BodegaDTO
 from dto.dto_producto import ProductoDTO
 from dto.dto_categoria import CategoriaDTO
+from dto.dto_registro import RegistroDTO
 
 
 # Funciones tkinter
@@ -119,6 +120,10 @@ def validarLogin(correo, contraseña):
     return resultado
 
 
+def aceptaTerminos(id):
+    TrDTO().aceptaTerminos(id)
+
+
 # Funciones DTO-DAO Editorial
 def createEditorial(numero, nombre):
     """Crea una editorial con un numero y un nombre
@@ -188,6 +193,14 @@ def createProducto(numero, nombre, desc, autor, editorial, categoria):
     return resultado
 
 
+def updateProducto(numero, desc, autor, editorial):
+    """Edita un Producto con un numero y una capacidad
+    después irá a la base de datos y edita el Producto"""
+
+    resultado = ProductoDTO().updateProducto(numero, desc, autor, editorial)
+    return resultado
+
+
 def listProducto():
     resultado = ProductoDTO().listProducto()
     return resultado
@@ -200,8 +213,8 @@ def deleteProducto(numero):
 
 
 def findProducto(numero):
-    "Busca un Bodega por su numero"
-    resultado = BodegaDTO().findBodega(numero)
+    "Busca un Producto por su numero"
+    resultado = ProductoDTO().findProducto(numero)
     return resultado
 
 
@@ -219,13 +232,20 @@ def findCategoriaId(nombre):
     return resultado
 
 
+# Funciones DTO-DAO Registro
+
+
+def listRegistro():
+    resultado = RegistroDTO().listRegistro()
+    return resultado
+
+
 # Ventanas de la aplicación
 class Login(ttk.Frame):
     def __init__(self, master):
         super().__init__(master, padding=(20, 10))
         self.pack(fill=BOTH, expand=YES)
         self.intentos = 0
-
         defaultFont()
 
         # form variables
@@ -289,6 +309,13 @@ class Login(ttk.Frame):
             try:
                 resu = validarLogin(self.correo.get(), self.pw.get())
                 if resu is not None:
+                    if resu.getTerminos() == 0:
+                        mensajeResp = f"¿Deseas aceptar los Términos y condiciones?"
+                        resp = pregunta(self, mensajeResp)
+                        if resp == "No":
+                            self.quit()
+                        elif resp == "Si":
+                            aceptaTerminos(resu.getId())
                     """Switch roles"""
                     match resu.getRol().lower():
                         case "administrador":
@@ -452,37 +479,52 @@ class CreateProducto(tk.Toplevel):
         for a in listEditorial().values():
             listaEditorial.append(a.getNombre())
 
-        listaCategoria = []
-        for a in listCategoria().values():
-            listaCategoria.append(a.getNombre())
+        if len(listaEditorial) == 0:
+            Messagebox.show_warning(
+                message="No hay editoriales ingresadas\nPor favor, ingresa una editorial",
+                parent=self,
+            )
+            self.destroy()
+        else:
+            listaCategoria = []
+            for a in listCategoria().values():
+                listaCategoria.append(a.getNombre())
 
-        # form variables
-        self.id = ttk.StringVar(value="")
-        self.nombre = ttk.StringVar(value="")
-        self.desc = ttk.StringVar(value="")
-        self.autor = ttk.StringVar(value="")
-        self.editorial = ttk.StringVar(value="")
-        self.categoria = ttk.StringVar(value="")
+            # form variables
+            self.id = ttk.StringVar(value="")
+            self.nombre = ttk.StringVar(value="")
+            self.desc = ttk.StringVar(value="")
+            self.autor = ttk.StringVar(value="")
+            self.editorial = ttk.StringVar(value="")
+            self.categoria = ttk.StringVar(value="")
 
-        # header and labelframe option container
-        option_text = "Ingresa los datos del producto a crear"
-        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
-        self.option_lf.pack(fill=X, expand=YES, anchor=N)
+            # header and labelframe option container
+            option_text = "Ingresa los datos del producto a crear"
+            self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
+            self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
-        # form entries
-        self.create_form_entry("id", self.id, validarInt)
-        self.create_form_entry("nombre", self.nombre, validarStr)
-        self.create_form_entry("descripcion", self.desc, validarStr)
-        self.create_form_entry("autor", self.autor, validarStr)
-        self.create_form_entry_combo(
-            "categoria", self.categoria, validarStr, listaCategoria
-        )
-        self.create_form_entry_combo(
-            "editorial", self.editorial, validarStr, listaEditorial
-        )
-        self.create_buttonbox()
-        self.create_results_view()
-        self.update_results_view()
+            # form entries
+            self.idEntry = self.create_form_entry("id", self.id, validarInt)
+            self.nombreEntry = self.create_form_entry("nombre", self.nombre, validarStr)
+            self.descEntry = self.create_form_entry(
+                "descripcion", self.desc, validarStr
+            )
+            self.autorEntry = self.create_form_entry("autor", self.autor, validarStr)
+            self.editorialEntry = self.create_form_entry_combo(
+                "categoria", self.categoria, validarStr, listaCategoria
+            )
+            self.categoriaEntry = self.create_form_entry_combo(
+                "editorial", self.editorial, validarStr, listaEditorial
+            )
+            self.create_buttonbox()
+
+            # form header
+            hdr_txt = "Lista de Productos"
+            hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+            hdr.pack(fill=X, pady=10)
+
+            self.create_results_view()
+            self.update_results_view()
 
     def create_form_entry(self, label, variable, val):
         # Crear una entrada
@@ -499,6 +541,8 @@ class CreateProducto(tk.Toplevel):
             validatecommand=(self.register(val), "%P"),
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
 
     def create_form_entry_combo(self, label, variable, val, list):
         # Crear una entrada
@@ -518,6 +562,8 @@ class CreateProducto(tk.Toplevel):
             state=READONLY,
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
 
     def create_buttonbox(self):
         # Crear los botones
@@ -581,7 +627,6 @@ class CreateProducto(tk.Toplevel):
         autor = self.autor.get()
         categoria = self.categoria.get()
         editorial = self.editorial.get()
-        print(id, nombre, desc, autor, categoria, editorial)
         if (
             validarInt(id)
             and validarStr(nombre)
@@ -596,12 +641,12 @@ class CreateProducto(tk.Toplevel):
             self.update_results_view()
 
             submit(self, mensaje)
-            self.id = ttk.StringVar(value="")
-            self.nombre = ttk.StringVar(value="")
-            self.desc = ttk.StringVar(value="")
-            self.autor = ttk.StringVar(value="")
-            self.editorial = ttk.StringVar(value="")
-            self.categoria = ttk.StringVar(value="")
+            self.idEntry.delete(0, END)
+            self.nombreEntry.delete(0, END)
+            self.descEntry.delete(0, END)
+            self.autorEntry.delete(0, END)
+            self.editorialEntry.set("")
+            self.categoriaEntry.set("")
 
         else:
             datosValidos(self)
@@ -620,9 +665,17 @@ class CreateBodega(tk.Toplevel):
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
         # form entries
-        self.create_form_entry("id", self.numero, validarInt)
-        self.create_form_entry("capacidad", self.capacidad, validarInt)
+        self.numeroEntry = self.create_form_entry("id", self.numero, validarInt)
+        self.capacidadEntry = self.create_form_entry(
+            "capacidad", self.capacidad, validarInt
+        )
         self.create_buttonbox()
+
+        # form header
+        hdr_txt = "Lista de Bodegas"
+        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+        hdr.pack(fill=X, pady=10)
+
         self.create_results_view()
         self.update_results_view()
 
@@ -641,6 +694,8 @@ class CreateBodega(tk.Toplevel):
             validatecommand=(self.register(val), "%P"),
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
 
     def create_buttonbox(self):
         # Crear los botones
@@ -692,8 +747,8 @@ class CreateBodega(tk.Toplevel):
             self.update_results_view()
 
             submit(self, mensaje)
-            self.numero = ttk.StringVar(value="")
-            self.capacidad = ttk.StringVar(value="")
+            self.numeroEntry.delete(0, END)
+            self.capacidadEntry.delete(0, END)
 
         else:
             datosValidos(self)
@@ -713,9 +768,15 @@ class CreateEditorial(tk.Toplevel):
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
         # form entries
-        self.create_form_entry("numero", self.numero, validarInt)
-        self.create_form_entry("nombre", self.nombre, validarStr)
+        self.numeroEntry = self.create_form_entry("numero", self.numero, validarInt)
+        self.nombreEntry = self.create_form_entry("nombre", self.nombre, validarStr)
         self.create_buttonbox()
+
+        # form header
+        hdr_txt = "Lista de Editoriales"
+        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+        hdr.pack(fill=X, pady=10)
+
         self.create_results_view()
         self.update_results_view()
 
@@ -734,6 +795,8 @@ class CreateEditorial(tk.Toplevel):
             validatecommand=(self.register(val), "%P"),
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
 
     def create_buttonbox(self):
         # Crear los botones
@@ -785,8 +848,8 @@ class CreateEditorial(tk.Toplevel):
             self.update_results_view()
 
             submit(self, mensaje)
-            self.numero = ttk.StringVar(value="")
-            self.nombre = ttk.StringVar(value="")
+            self.numeroEntry.delete(0, END)
+            self.nombreEntry.delete(0, END)
 
         else:
             datosValidos(self)
@@ -804,97 +867,13 @@ class DelProducto(tk.Toplevel):
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
-        self.create_term_row()
-        self.create_results_view()
+        self.idEntry = self.create_term_row()
 
-        # form entries
-        # self.create_form_entry("id", self.id, validarStr)
-        # self.create_buttonbox()
+        # form header
+        hdr_txt = "Lista de Productos"
+        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+        hdr.pack(fill=X, pady=10)
 
-    def create_term_row(self):
-        """Add term row to labelframe"""
-        term_row = ttk.Frame(self.option_lf)
-        term_row.pack(fill=X, expand=YES, pady=15)
-        term_lbl = ttk.Label(term_row, text="Id", width=18)
-        term_lbl.pack(side=LEFT, padx=(15, 0))
-        term_ent = ttk.Entry(
-            term_row,
-            textvariable=self.id,
-            validate="focus",
-            validatecommand=(self.register(validarInt), "%P"),
-        )
-        term_ent.pack(side=LEFT, fill=X, expand=YES, padx=5)
-        search_btn = ttk.Button(
-            master=term_row,
-            text="Eliminar",
-            command=self.on_submit,
-            bootstyle=DANGER,
-            width=8,
-        )
-        search_btn.pack(side=LEFT, padx=5)
-
-    def create_results_view(self):
-        """Add result treeview to labelframe"""
-        self.resultview = ttk.Treeview(
-            master=self, bootstyle=INFO, columns=[0, 1, 2, 3, 4], show=HEADINGS
-        )
-        self.resultview.pack(fill=BOTH, expand=YES, pady=10)
-
-        # setup columns and use `scale_size` to adjust for resolution
-        self.resultview.heading(0, text="Id", anchor=W)
-        self.resultview.heading(1, text="Producto", anchor=W)
-        self.resultview.heading(2, text="Autor", anchor=W)
-        self.resultview.heading(3, text="Editorial", anchor=W)
-        self.resultview.heading(4, text="Categoría", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
-        self.resultview.column(column=3, anchor=W, stretch=False)
-        self.resultview.column(column=4, anchor=W, stretch=False)
-
-        # insert falso
-
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-
-        self.resultview.item(
-            iid,
-            open=True,
-            values=[
-                1,
-                "El principito",
-                "Antoine De Saint-Exupéry",
-                "Salamandra",
-                "Libro",
-            ],
-        )
-
-    def on_submit(self):
-        # Valida las entradas y llama la función delProducto()
-        id = "1"
-
-        Messagebox.show_info(
-            title="Aviso",
-            message=f"Producto Eliminado:\nId: {id} ",
-            parent=self,
-        )
-
-
-class DelBodega(tk.Toplevel):
-    def __init__(self, parent):
-        super().__init__(parent, padx=20, pady=10)
-
-        # form variables
-        self.id = ttk.StringVar(value="")
-
-        # header and labelframe option container
-        option_text = "Eliminar Bodega por Id"
-        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
-        self.option_lf.pack(fill=X, expand=YES, anchor=N)
-
-        self.create_term_row()
         self.create_results_view()
         self.update_results_view()
 
@@ -919,6 +898,114 @@ class DelBodega(tk.Toplevel):
             width=8,
         )
         search_btn.pack(side=LEFT, padx=5)
+        return term_ent
+
+    def create_results_view(self):
+        """Add result treeview to labelframe"""
+        self.resultview = ttk.Treeview(
+            master=self, bootstyle=INFO, columns=[0, 1, 2, 3, 4], show=HEADINGS
+        )
+        self.resultview.pack(fill=BOTH, expand=YES, pady=10)
+
+        # setup columns and use `scale_size` to adjust for resolution
+        self.resultview.heading(0, text="Id", anchor=W)
+        self.resultview.heading(1, text="Producto", anchor=W)
+        self.resultview.heading(2, text="Autor", anchor=W)
+        self.resultview.heading(3, text="Editorial", anchor=W)
+        self.resultview.heading(4, text="Categoría", anchor=W)
+        self.resultview.column(column=0, anchor=W, stretch=False)
+        self.resultview.column(column=1, anchor=W, stretch=False)
+        self.resultview.column(column=2, anchor=W, stretch=False)
+        self.resultview.column(column=3, anchor=W, stretch=False)
+        self.resultview.column(column=4, anchor=W, stretch=False)
+
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listProducto().values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
+
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a.getNumero(),
+                    a.getNombre(),
+                    a.getAutor(),
+                    a.getEditorial(),
+                    a.getCategoria(),
+                ],
+            )
+
+    def on_submit(self):
+        # Valida las entradas y llama la función delProducto()
+        if validarInt(self.id.get()):
+            buscar = findProducto(self.id.get())
+            if buscar:
+                mensajeResp = f"Estás a punto de eliminar el Producto:\nId: {buscar.getNumero()}\nNombre: {buscar.getNombre()}\n ¿Estás seguro?"
+                resp = pregunta(self, mensajeResp)
+                if resp == "Si":
+                    mensaje = deleteProducto(self.id.get())
+                    self.update_results_view()
+                elif resp == "No":
+                    mensaje = "No se realizaron cambios"
+            else:
+                mensaje = f"No se pudo encontrar el Producto"
+
+            submit(self, mensaje)
+            self.idEntry.delete(0, END)
+        else:
+            datosValidos(self)
+
+
+class DelBodega(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent, padx=20, pady=10)
+
+        # form variables
+        self.id = ttk.StringVar(value="")
+
+        # header and labelframe option container
+        option_text = "Eliminar Bodega por Id"
+        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
+        self.option_lf.pack(fill=X, expand=YES, anchor=N)
+
+        self.idEntry = self.create_term_row()
+
+        # form header
+        hdr_txt = "Lista de Bodegas"
+        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+        hdr.pack(fill=X, pady=10)
+
+        self.create_results_view()
+        self.update_results_view()
+
+    def create_term_row(self):
+        """Add term row to labelframe"""
+        term_row = ttk.Frame(self.option_lf)
+        term_row.pack(fill=X, expand=YES, pady=15)
+        term_lbl = ttk.Label(term_row, text="Id", width=18)
+        term_lbl.pack(side=LEFT, padx=(15, 0))
+        term_ent = ttk.Entry(
+            term_row,
+            textvariable=self.id,
+            validate="focus",
+            validatecommand=(self.register(validarInt), "%P"),
+        )
+        term_ent.pack(side=LEFT, fill=X, expand=YES, padx=5)
+        search_btn = ttk.Button(
+            master=term_row,
+            text="Eliminar",
+            command=self.on_submit,
+            bootstyle=DANGER,
+            width=8,
+        )
+        search_btn.pack(side=LEFT, padx=5)
+
+        return term_ent
 
     def create_results_view(self):
         """Add result treeview to labelframe"""
@@ -973,7 +1060,7 @@ class DelBodega(tk.Toplevel):
                 mensaje = f"No se pudo encontrar la Bodega"
 
             submit(self, mensaje)
-            self.id = ttk.StringVar(value="")
+            self.idEntry.delete(0, END)
         else:
             datosValidos(self)
 
@@ -990,7 +1077,13 @@ class DelEditorial(tk.Toplevel):
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
-        self.create_term_row()
+        self.idEntry = self.create_term_row()
+
+        # form header
+        hdr_txt = "Lista de Editoriales"
+        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+        hdr.pack(fill=X, pady=10)
+
         self.create_results_view()
         self.update_results_view()
 
@@ -1015,6 +1108,7 @@ class DelEditorial(tk.Toplevel):
             width=8,
         )
         search_btn.pack(side=LEFT, padx=5)
+        return term_ent
 
     def create_results_view(self):
         """Add result treeview to labelframe"""
@@ -1059,7 +1153,7 @@ class DelEditorial(tk.Toplevel):
             else:
                 mensaje = f"No se pudo encontrar la editorial"
                 submit(self, mensaje)
-            self.id = ttk.StringVar(value="")
+            self.idEntry.delete(0, END)
         else:
             datosValidos(self)
 
@@ -1068,33 +1162,51 @@ class UpdateProducto(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent, padx=20, pady=10)
 
-        # form variables
-        self.id = ttk.StringVar(value="")
-        self.nombre = ttk.StringVar(value="")
-        self.desc = ttk.StringVar(value="")
-        self.autor = ttk.StringVar(value="")
-        self.editorial = ttk.StringVar(value="")
-        self.categoria = ttk.StringVar(value="")
+        listaEditorial = []
+        for a in listEditorial().values():
+            listaEditorial.append(a.getNombre())
 
-        # header and labelframe option container
-        option_text2 = "Ingresa la id a editar"
-        self.option_lf2 = ttk.Labelframe(self, text=option_text2, padding=15)
-        self.option_lf2.pack(fill=X, expand=YES, anchor=N)
+        if len(listaEditorial) == 0:
+            Messagebox.show_warning(
+                message="No hay editoriales ingresadas\nPor favor, ingresa una editorial",
+                parent=self,
+            )
+            self.destroy()
+        else:
+            # form variables
+            self.id = ttk.StringVar(value="")
+            self.desc = ttk.StringVar(value="")
+            self.autor = ttk.StringVar(value="")
+            self.editorial = ttk.StringVar(value="")
 
-        # header and labelframe option container
-        option_text = "Ingresa los nuevos datos"
-        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
-        self.option_lf.pack(fill=X, expand=YES, anchor=N)
+            # header and labelframe option container
+            option_text2 = "Ingresa la Id del Producto a Editar"
+            self.option_lf2 = ttk.Labelframe(self, text=option_text2, padding=15)
+            self.option_lf2.pack(fill=X, expand=YES, anchor=N)
 
-        # form entries
-        self.create_form_entry2("id", self.id, validarInt)
-        self.create_form_entry("nombre", self.nombre, validarStr)
-        self.create_form_entry("descripcion", self.desc, validarStr)
-        self.create_form_entry("autor", self.autor, validarStr)
-        self.create_form_entry_combo("categoria", self.categoria, validarStr)
-        self.create_form_entry_combo("editorial", self.editorial, validarStr)
-        self.create_results_view()
-        self.create_buttonbox()
+            # header and labelframe option container
+            option_text = "Ingresa los Nuevos Datos"
+            self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
+            self.option_lf.pack(fill=X, expand=YES, anchor=N, pady=10)
+
+            # form entries
+            self.idEntry = self.create_form_entry2("id", self.id, validarInt)
+            self.descEntry = self.create_form_entry(
+                "descripcion", self.desc, validarStr
+            )
+            self.autorEntry = self.create_form_entry("autor", self.autor, validarStr)
+            self.editorialEntry = self.create_form_entry_combo(
+                "editorial", self.editorial, validarStr, listaEditorial
+            )
+
+            # form header
+            hdr_txt = "Lista de Productos"
+            hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+            hdr.pack(fill=X, pady=10)
+
+            self.create_results_view()
+            self.create_buttonbox()
+            self.update_results_view()
 
     def create_form_entry2(self, label, variable, val):
         # Crear una entrada
@@ -1111,6 +1223,7 @@ class UpdateProducto(tk.Toplevel):
             validatecommand=(self.register(val), "%P"),
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+        return ent
 
     def create_form_entry(self, label, variable, val):
         # Crear una entrada
@@ -1123,12 +1236,11 @@ class UpdateProducto(tk.Toplevel):
         ent = ttk.Entry(
             master=container,
             textvariable=variable,
-            validate="focus",
-            validatecommand=(self.register(val), "%P"),
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+        return ent
 
-    def create_form_entry_combo(self, label, variable, val):
+    def create_form_entry_combo(self, label, variable, val, list):
         # Crear una entrada
         container = ttk.Frame(self.option_lf)
         container.pack(fill=X, expand=YES, pady=5)
@@ -1139,12 +1251,11 @@ class UpdateProducto(tk.Toplevel):
         ent = ttk.Combobox(
             master=container,
             textvariable=variable,
-            validate="focus",
-            validatecommand=(self.register(val), "%P"),
-            values=[],
+            values=list,
             state=READONLY,
         )
         ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+        return ent
 
     def create_buttonbox(self):
         # Crear los botones
@@ -1166,7 +1277,6 @@ class UpdateProducto(tk.Toplevel):
             master=self, bootstyle=INFO, columns=[0, 1, 2, 3, 4], show=HEADINGS
         )
         self.resultview.pack(fill=BOTH, expand=YES, pady=10)
-
         # setup columns and use `scale_size` to adjust for resolution
         self.resultview.heading(0, text="Id", anchor=W)
         self.resultview.heading(1, text="Producto", anchor=W)
@@ -1179,44 +1289,53 @@ class UpdateProducto(tk.Toplevel):
         self.resultview.column(column=3, anchor=W, stretch=False)
         self.resultview.column(column=4, anchor=W, stretch=False)
 
-        # insert falso
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listProducto().values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
 
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-
-        self.resultview.item(
-            iid,
-            open=True,
-            values=[
-                1,
-                "El principito",
-                "Antoine De Saint-Exupéry",
-                "Salamandra",
-                "Libro",
-            ],
-        )
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a.getNumero(),
+                    a.getNombre(),
+                    a.getAutor(),
+                    a.getEditorial(),
+                    a.getCategoria(),
+                ],
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createProducto()
-        id = "1"
-        nombre = self.nombre.get()
-        desc = self.desc.get()
-        autor = self.autor.get()
-        editorial = self.editorial.get()
-        categoria = self.categoria.get()
+        if validarInt(self.id.get()):
+            buscar = findProducto(self.id.get())
+            if buscar:
+                mensaje = updateProducto(
+                    self.id.get(),
+                    self.desc.get(),
+                    self.autor.get(),
+                    self.editorial.get(),
+                )
+                self.update_results_view()
 
-        Messagebox.show_info(
-            title="Aviso",
-            message=f"Producto editado:\nId: {id} \nNombre: {nombre}",
-            parent=self,
-        )
+            else:
+                mensaje = f"No se pudo encontrar el Producto"
+
+            submit(self, mensaje)
+            self.idEntry.delete(0, END)
+            self.descEntry.delete(0, END)
+            self.autorEntry.delete(0, END)
+            self.editorialEntry.set("")
+        else:
+            datosValidos(self)
 
 
 class SearchInfGeneral(tk.Toplevel):
-    searching = False
-
     def __init__(self, master):
         super().__init__(master, padx=20, pady=10)
 
@@ -1231,6 +1350,7 @@ class SearchInfGeneral(tk.Toplevel):
         hdr.pack(fill=X, pady=10)
 
         self.create_results_view()
+        self.update_results_view()
 
     def create_results_view(self):
         """Add result treeview to labelframe"""
@@ -1273,112 +1393,37 @@ class SearchInfGeneral(tk.Toplevel):
             ],
         )
 
-    def on_browse(self):
-        """Callback for directory browse"""
-        path = askdirectory(title="Browse directory")
-        if path:
-            self.path_var.set(path)
-
-    def on_search(self):
-        """Search for a term based on the search type"""
-        search_term = self.term_var.get()
-        search_path = self.path_var.get()
-        search_type = self.type_var.get()
-
-        if search_term == "":
-            return
-
-        # start search in another thread to prevent UI from locking
-        Thread(
-            target=SearchInfBodega.file_search,
-            args=(search_term, search_path, search_type),
-            daemon=True,
-        ).start()
-        self.progressbar.start(10)
-
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-        self.resultview.item(iid, open=True)
-        self.after(100, lambda: self.check_queue(iid))
-
-    def insert_row(self, file, iid):
-        """Insert new row in tree search results"""
-        try:
-            _stats = file.stat()
-            _name = file.stem
-            _timestamp = datetime.datetime.fromtimestamp(_stats.st_mtime)
-            _modified = _timestamp.strftime(r"%m/%d/%Y %I:%M:%S%p")
-            _type = file.suffix.lower()
-            _size = SearchInfBodega.convert_size(_stats.st_size)
-            _path = file.as_posix()
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in listRegistro().values():
             iid = self.resultview.insert(
-                parent="", index=END, values=(_name, _modified, _type, _size, _path)
+                parent="",
+                index=END,
             )
-            self.resultview.selection_set(iid)
-            self.resultview.see(iid)
-        except OSError:
-            return
+            match a.getTipo():
+                case "Entrada":
+                    origen = a.getProveedor()
+                    destino = f"Bodega {a.getBodega()}"
+                case "Salida":
+                    origen = f"Bodega {a.getBodega()}"
+                    destino = a.getTiendaDestino()
+                case "Traslado":
+                    origen = f"Bodega {a.getBodegaOrigenDestino()}"
+                    destino = f"Bodega {a.getBodega()}"
 
-    @staticmethod
-    def file_search(term, search_path, search_type):
-        """Recursively search directory for matching files"""
-        SearchInfBodega.set_searching(1)
-        if search_type == "contains":
-            SearchInfBodega.find_contains(term, search_path)
-        elif search_type == "startswith":
-            SearchInfBodega.find_startswith(term, search_path)
-        elif search_type == "endswith":
-            SearchInfBodega.find_endswith(term, search_path)
-
-    @staticmethod
-    def find_contains(term, search_path):
-        """Find all files that contain the search term"""
-        for path, _, files in pathlib.os.walk(search_path):
-            if files:
-                for file in files:
-                    if term in file:
-                        record = pathlib.Path(path) / file
-                        SearchInfBodega.queue.put(record)
-        SearchInfBodega.set_searching(False)
-
-    @staticmethod
-    def find_startswith(term, search_path):
-        """Find all files that start with the search term"""
-        for path, _, files in pathlib.os.walk(search_path):
-            if files:
-                for file in files:
-                    if file.startswith(term):
-                        record = pathlib.Path(path) / file
-                        SearchInfBodega.queue.put(record)
-        SearchInfBodega.set_searching(False)
-
-    @staticmethod
-    def find_endswith(term, search_path):
-        """Find all files that end with the search term"""
-        for path, _, files in pathlib.os.walk(search_path):
-            if files:
-                for file in files:
-                    if file.endswith(term):
-                        record = pathlib.Path(path) / file
-                        SearchInfBodega.queue.put(record)
-        SearchInfBodega.set_searching(False)
-
-    @staticmethod
-    def set_searching(state=False):
-        """Set searching status"""
-        SearchInfBodega.searching = state
-
-    @staticmethod
-    def convert_size(size):
-        """Convert bytes to mb or kb depending on scale"""
-        kb = size // 1000
-        mb = round(kb / 1000, 1)
-        if kb > 1000:
-            return f"{mb:,.1f} MB"
-        else:
-            return f"{kb:,d} KB"
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a.getId(),
+                    a.getFecha(),
+                    origen,
+                    destino,
+                    a.getTipo(),
+                    f"{a.getTrabajador().getNombre()} {a.getTrabajador().getApellido()}",
+                ],
+            )
 
 
 class SearchInfBodega(tk.Toplevel):
@@ -1617,5 +1662,5 @@ if __name__ == "__main__":
     login = ttk.Window("Librería el Gran Poeta", "superhero", resizable=(False, False))
 
     place_window_center(login)
-    Login(login)
+    SearchInfGeneral(login)
     login.mainloop()

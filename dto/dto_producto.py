@@ -24,6 +24,18 @@ class ProductoDTO:
         )
         return resultado
 
+    def updateProducto(self, numero, desc, autor, editorial):
+        daoProducto = DaoProducto()
+        resultado = daoProducto.updateProducto(
+            Producto(
+                numero=numero,
+                descripcion=desc.upper(),
+                autor=autor.upper(),
+                editorial=Editorial(numero=editorial),
+            )
+        )
+        return resultado
+
     def deleteProducto(self, numero):
         daoProducto = DaoProducto()
         resultado = daoProducto.deleteProducto(Producto(numero=numero))

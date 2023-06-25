@@ -57,6 +57,55 @@ class DaoProducto:
                 c.closeConex()
         return mensaje
 
+    def updateProducto(self, producto):
+        param = "set @desc = %s;"
+        param2 = "set @autor = %s;"
+        param3 = "set @idEd = %s;"
+        sql = """update producto set 
+                descripcionProducto = case when @desc='' then descripcionProducto else @desc end, 
+                autorProducto = case when @autor='' then autorProducto else @autor end, 
+                idEditorial = case when @idEd='' then idEditorial else @idEd end where numeroProducto = %s"""
+        c = self.getConex()
+        mensaje = ""
+
+        try:
+            cursor = c.getConex().cursor()
+            if producto.getEditorial().getNumero() == "":
+                idEditorial = [""]
+            else:
+                cursor.execute(
+                    f"select idEditorial from editorial where numeroeditorial = {producto.getEditorial().getNumero()}"
+                )
+                idEditorial = cursor.fetchone()
+
+            cursor.execute(param, (producto.getDescripcion(),))
+            cursor.execute(param2, (producto.getAutor(),))
+            cursor.execute(param3, (idEditorial[0],))
+            cursor.execute(
+                sql,
+                (producto.getNumero(),),
+            )
+            c.getConex().commit()
+            filas = cursor.rowcount
+
+            if filas > 0:
+                mensaje = f"Producto Modificado:\nId: {producto.getNumero()}"
+            else:
+                mensaje = "No se realizaron cambios"
+
+        except Exception as ex:
+            print(traceback.print_exc())
+            ex = str(ex)
+
+            if ex.startswith("1062"):
+                mensaje = "Dato duplicado\nPor favor, ingresa un valor distinto"
+            else:
+                mensaje = "Problemas con la base de datos\nVuelva a intentarlo"
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return mensaje
+
     def listProducto(self):
         c = self.getConex()
         lista = {}
@@ -132,7 +181,7 @@ class DaoProducto:
             resultado = cursor.fetchall()
             if resultado is not None:
                 for a in resultado:
-                    resultado = producto(
+                    resultado = Producto(
                         a[0],
                         a[1].capitalize(),
                         a[2].capitalize(),

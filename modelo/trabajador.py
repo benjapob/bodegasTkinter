@@ -11,7 +11,15 @@ else:
 class Trabajador:
     # Constructor
     def __init__(
-        self, id="", nombre="", apellido="", rut="", correo="", contraseña="", rol=""
+        self,
+        id="",
+        nombre="",
+        apellido="",
+        rut="",
+        correo="",
+        contraseña="",
+        rol="",
+        terminos="",
     ):
         self.__id = id
         self.__nombre = nombre
@@ -20,6 +28,7 @@ class Trabajador:
         self.__correo = correo
         self.__contraseña = Encoder().encode(contraseña)
         self.__rol = rol
+        self.__terminos = terminos
 
     # Funcion str para hacer print al objeto
     def __str__(self) -> str:
@@ -49,6 +58,9 @@ class Trabajador:
     def getRol(self):
         return self.__rol
 
+    def getTerminos(self):
+        return self.__terminos
+
     # Setters
     def setId(self, id):
         self.__id = id
@@ -70,3 +82,6 @@ class Trabajador:
 
     def setRol(self, rol):
         self.__rol = rol
+
+    def setTerminos(self, terminos):
+        self.__terminos = terminos
