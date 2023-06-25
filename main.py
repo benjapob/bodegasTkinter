@@ -11,6 +11,7 @@ from dto.dto_bodega import BodegaDTO
 from dto.dto_producto import ProductoDTO
 from dto.dto_categoria import CategoriaDTO
 from dto.dto_registro import RegistroDTO
+from dto.dto_detalle import DetalleDTO
 
 
 # Funciones tkinter
@@ -232,6 +233,14 @@ def findCategoriaId(nombre):
 
 def listRegistro():
     resultado = RegistroDTO().listRegistro()
+    return resultado
+
+
+# Funciones DTO-DAO Detalle
+
+
+def listDetalle(bodega, numeroProducto):
+    resultado = DetalleDTO().listDetalle(bodega, numeroProducto)
     return resultado
 
 
@@ -1464,26 +1473,36 @@ class SearchInfBodega(tk.Toplevel):
 
     def on_submit(self):
         # Valida las entradas y abre el informe()
-        window = SearchInfBodegaCont(self)
-        place_window_center(window)
-        window.grab_set()
+        if validarInt(self.numero.get()):
+            numeroProducto = next(iter(listProducto()))
+            resultado = listDetalle(self.numero.get(), numeroProducto)
+            if resultado:
+                window = SearchInfBodegaCont(self, resultado)
+                place_window_center(window)
+                window.grab_set()
+            else:
+                submit(self, "No se pudo encontrar la bodega")
+        else:
+            datosValidos(self)
 
 
 class SearchInfBodegaCont(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, resultado):
         super().__init__(master, padx=20, pady=10)
 
+        self.resultado = resultado
+
         # application variables
-        self.path_var = ttk.StringVar(value="")
-        self.term_var = ttk.StringVar(value="")
+        self.filtro = ttk.StringVar(value="")
 
         # header and labelframe option container
         option_text = "Buscar movimientos generales"
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
-        self.create_term_row()
+        self.filtroEntry = self.create_term_row()
         self.create_results_view()
+        self.update_results_view(resultado)
 
     def create_term_row(self):
         """Add term row to labelframe"""
@@ -1493,7 +1512,7 @@ class SearchInfBodegaCont(tk.Toplevel):
         term_lbl.pack(side=LEFT, padx=(15, 0))
         term_ent = ttk.Entry(
             term_row,
-            textvariable=self.term_var,
+            textvariable=self.filtro,
             validate="focus",
             validatecommand=(self.register(validarStr), "%P"),
         )
@@ -1506,6 +1525,7 @@ class SearchInfBodegaCont(tk.Toplevel):
             width=8,
         )
         search_btn.pack(side=LEFT, padx=5)
+        return term_ent
 
     def create_results_view(self):
         """Add result treeview to labelframe"""
@@ -1526,19 +1546,55 @@ class SearchInfBodegaCont(tk.Toplevel):
         self.resultview.column(column=3, anchor=W, stretch=False)
         self.resultview.column(column=4, stretch=False)
 
-        # insert falso
+    def update_results_view(self, resultado):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in resultado.values():
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
 
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a.getNumeroProducto(),
+                    a.getNombreProducto(),
+                    a.getCantidadProducto(),
+                    a.getNombreCategoria(),
+                    a.getNombreEditorial(),
+                ],
+            )
 
-        self.resultview.item(
-            iid, open=True, values=[1, "El Principito", 26, "Libro", "Salamandra"]
-        )
+    def filter_results_view(self, resultado, filtro):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in resultado.values():
+            if a.getNombreEditorial() == filtro:
+                iid = self.resultview.insert(
+                    parent="",
+                    index=END,
+                )
+
+                self.resultview.item(
+                    iid,
+                    open=True,
+                    values=[
+                        a.getNumeroProducto(),
+                        a.getNombreProducto(),
+                        a.getCantidadProducto(),
+                        a.getNombreCategoria(),
+                        a.getNombreEditorial(),
+                    ],
+                )
 
     def on_search(self):
-        pass
+        if self.filtro.get() == "":
+            self.update_results_view(self.resultado)
+        else:
+            self.filter_results_view(self.resultado, self.filtro.get().capitalize())
+            self.filtroEntry.delete(0, END)
 
 
 if __name__ == "__main__":
