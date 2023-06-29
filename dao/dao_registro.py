@@ -22,7 +22,7 @@ class DaoRegistro:
             cursor.execute(
                 """select reg.idRegistro, reg.fechaCreacion, reg.tiendaDestino, reg.proveedor, 
                     reg.bodegaOrigenDestino, tipo.nombreTipo, bod.numeroBodega, tr.nombreTrabajador, tr.apellidoTrabajador 
-                    from registro_movimiento reg, tipo_movimiento tipo, bodega bod, trabajador tr 
+                    from registroMovimiento reg, tipoMovimiento tipo, bodega bod, trabajador tr 
                     where reg.idTipo = tipo.idTipo 
                     and reg.idBodega = bod.idBodega 
                     and reg.idTrabajador = tr.idTrabajador 
@@ -50,3 +50,42 @@ class DaoRegistro:
             if c.getConex().is_connected():
                 c.closeConex()
         return lista
+
+    def addEntrada(self, registroMovimiento):
+        sql = """insert into registroMovimiento 
+        (`idRegistro`, `tiendaDestino`, `proveedor`, `bodegaOrigenDestino`, `idTipo`, `idBodega`, `idTrabajador`)  
+        values (%s,'', %s, '', 1, %s, %s)"""
+        id = registroMovimiento.getId()
+        c = self.getConex()
+        mensaje = ""
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(
+                sql,
+                (
+                    id,
+                    registroMovimiento.getProveedor(),
+                    registroMovimiento.getBodega(),
+                    registroMovimiento.getTrabajador(),
+                ),
+            )
+            c.getConex().commit()
+            filas = cursor.rowcount
+
+            if filas > 0:
+                mensaje = id
+            else:
+                mensaje = "No se realizaron cambios"
+
+        except Exception as ex:
+            print(traceback.print_exc())
+            ex = str(ex)
+
+            if ex.startswith("1062"):
+                mensaje = "Dato duplicado\nPor favor, ingresa un valor distinto"
+            else:
+                mensaje = "Problemas con la base de datos\nVuelva a intentarlo"
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return mensaje

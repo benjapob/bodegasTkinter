@@ -31,7 +31,7 @@ class DaoDetalle:
             cursor.execute(
                 f"""select pro.numeroProducto, pro.nombreProducto, det.cantidadProducto,
                     ed.nombreEditorial, cat.nombreCategoria, bod.numeroBodega, tipo.nombreTipo, reg.bodegaOrigenDestino
-                    from detalle_movimiento det, registro_movimiento reg, bodega bod, producto pro, editorial ed, categoria cat, tipo_movimiento tipo
+                    from detalleMovimiento det, detalleMovimiento reg, bodega bod, producto pro, editorial ed, categoria cat, tipoMovimiento tipo
                     where det.idRegistro = reg.idRegistro 
                     and det.idProducto = pro.idProducto 
                     and reg.idBodega = bod.idBodega  
@@ -74,3 +74,40 @@ class DaoDetalle:
             if c.getConex().is_connected():
                 c.closeConex()
         return lista
+
+    def addDetalle(self, detalleMovimiento):
+        # sql = f"""insert into detalleMovimiento values (null, 300 , 1, 9), (null, 555, 1, 9)"""
+        c = self.getConex()
+        mensaje = ""
+        try:
+            cursor = c.getConex().cursor()
+            """cursor.execute(
+                "insert into detalleMovimiento values (null, 300 , 1, 9)",
+                (),
+            )
+            c.getConex().commit()"""
+            for a in detalleMovimiento.getNombreProducto():
+                cursor.execute(
+                    f"insert into detalleMovimiento values (null, {a['cantidadProducto']}, {a['numeroProducto']} , {detalleMovimiento.getRegistro()})",
+                    (),
+                )
+                c.getConex().commit()
+            filas = cursor.rowcount
+
+            if filas > 0:
+                mensaje = f"Movimiento realizado con éxito"
+            else:
+                mensaje = "No se realizaron cambios"
+
+        except Exception as ex:
+            print(traceback.print_exc())
+            ex = str(ex)
+
+            if ex.startswith("1062"):
+                mensaje = "Dato duplicado\nPor favor, ingresa un valor distinto"
+            else:
+                mensaje = "Problemas con la base de datos\nVuelva a intentarlo"
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return mensaje

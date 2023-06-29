@@ -194,3 +194,22 @@ class DaoProducto:
             if c.getConex().is_connected():
                 c.closeConex()
         return resultado
+
+    def findProductoNum(self, producto):
+        c = self.getConex()
+        resultado = None
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(
+                f"""select numeroProducto from producto where nombreProducto = '{producto.getNombre()}'"""
+            )
+            resultado = cursor.fetchall()
+            if resultado is not None:
+                for a in resultado:
+                    resultado = Producto(numero=a[0])
+        except Exception as ex:
+            print(traceback.print_exc())
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return resultado

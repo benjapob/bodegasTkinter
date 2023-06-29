@@ -3,6 +3,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
+from tkinter import PhotoImage
 
 # Import DTO
 from dto.dto_tr import TrDTO
@@ -107,12 +108,23 @@ def pregunta(self, mensaje):
     return resp
 
 
-# Funciones DTO-DAO Login
+# Funciones DTO-DAO Trabajador
 def validarLogin(correo, contraseña):
     """Valida el login con un correo y contraseña,
     después irá a la base de datos y buscará un usuario"""
 
     resultado = TrDTO().validarLogin(correo, contraseña)
+    return resultado
+
+
+def listTrabajador():
+    resultado = TrDTO().listTrabajador()
+    return resultado
+
+
+def findTrabajador(nombre, apellido):
+    "Busca una Trabajador por su nombre"
+    resultado = TrDTO().findTrabajador(nombre, apellido)
     return resultado
 
 
@@ -214,6 +226,12 @@ def findProducto(numero):
     return resultado
 
 
+def findProductoNum(nombre):
+    "Busca un Producto por su nombre"
+    resultado = ProductoDTO().findProductoNum(nombre)
+    return resultado
+
+
 # Funciones DTO-DAO Categoria
 
 
@@ -236,7 +254,23 @@ def listRegistro():
     return resultado
 
 
+def createEntrada(id, proveedor, bodega, trabajador):
+    """Crea un Entrada con un numero y una capacidad
+    después irá a la base de datos y creara la Entrada"""
+
+    resultado = RegistroDTO().createEntrada(id, proveedor, bodega, trabajador)
+    return resultado
+
+
 # Funciones DTO-DAO Detalle
+
+
+def createDetalle(listaProducto, registro):
+    """Crea un Detalle con un numero y una capacidad
+    después irá a la base de datos y creara la Detalle"""
+
+    resultado = DetalleDTO().createDetalle(listaProducto, registro)
+    return resultado
 
 
 def listDetalle(bodega, numeroProducto):
@@ -322,9 +356,6 @@ class Login(ttk.Frame):
                             aceptaTerminos(resu.getId())
                     """Switch roles"""
                     match resu.getRol().lower():
-                        case "administrador":
-                            pass
-
                         case "jefe de bodega":
                             # Abre una nueva ventana con el menú para el jefe
                             window = MenuJefe(self, resu)
@@ -332,7 +363,10 @@ class Login(ttk.Frame):
                             window.grab_set()
 
                         case "bodeguero":
-                            pass
+                            # Abre una nueva ventana con el menú para el bodeguero
+                            window = MenuBodeguero(self, resu)
+                            place_window_center(window)
+                            window.grab_set()
                 else:
                     self.intentos += 1
                     if self.intentos == 4:
@@ -372,29 +406,39 @@ class MenuJefe(tk.Toplevel):
         containerRow1 = ttk.Frame(self)
         containerRow1.pack(fill=X, expand=YES, pady=(15, 10))
 
-        self.create_buttonbox(containerRow1, "Crear Producto", self.createProducto)
-        self.create_buttonbox(containerRow1, "Crear Bodega", self.createBodega)
-        self.create_buttonbox(containerRow1, "Crear Editorial", self.createEditorial)
+        self.create_buttonbox(
+            containerRow1, "Crear \nProducto", self.createProducto, "add"
+        )
+        self.create_buttonbox(containerRow1, "Crear \nBodega", self.createBodega, "add")
+        self.create_buttonbox(
+            containerRow1, "Crear \nEditorial", self.createEditorial, "add"
+        )
 
         # Contenedor menú row 2
         containerRow2 = ttk.Frame(self)
         containerRow2.pack(fill=X, expand=YES, pady=(15, 10))
 
-        self.create_buttonbox(containerRow2, "Eliminar Producto", self.delProducto)
-        self.create_buttonbox(containerRow2, "Eliminar Bodega", self.delBodega)
-        self.create_buttonbox(containerRow2, "Eliminar Editorial", self.delEditorial)
+        self.create_buttonbox(
+            containerRow2, "Eliminar\nProducto", self.delProducto, "del"
+        )
+        self.create_buttonbox(containerRow2, "Eliminar\nBodega", self.delBodega, "del")
+        self.create_buttonbox(
+            containerRow2, "Eliminar\nEditorial", self.delEditorial, "del"
+        )
 
         # Contenedor menú row 2
         containerRow3 = ttk.Frame(self)
         containerRow3.pack(fill=X, expand=YES, pady=(15, 10))
 
-        self.create_buttonbox(containerRow3, "Editar Producto", self.updateProducto)
         self.create_buttonbox(
-            containerRow3, "Generar Informe \nGeneral", self.searchInfGeneral
+            containerRow3, "Editar\nProducto", self.updateProducto, "edit"
+        )
+        self.create_buttonbox(
+            containerRow3, "Generar\nInforme\nGeneral", self.searchInfGeneral, "inf"
         )
 
         self.create_buttonbox(
-            containerRow3, "Generar Informe \npor Bodega", self.searchInfBodega
+            containerRow3, "Generar\nInforme\nBodega", self.searchInfBodega, "inf"
         )
 
         # Contenedor boton
@@ -403,16 +447,20 @@ class MenuJefe(tk.Toplevel):
 
         self.create_buttonCancel(containerBtn, "Salir", self.on_cancel)
 
-    def create_buttonbox(self, container, title, command):
+    def create_buttonbox(self, container, title, command, img):
         # Crear los botones
-
+        button = PhotoImage(file=f"img/{img}.png")
+        # button = button.subsample(2, 2)
         menuBtn = ttk.Button(
             master=container,
             text=title,
             command=command,
             bootstyle=PRIMARY,
             padding=10,
+            image=button,
+            compound=LEFT,
         )
+        menuBtn.image = button  # keep a reference!
         menuBtn.pack(side=LEFT, padx=15)
 
     def create_buttonCancel(self, container, title, command):
@@ -1474,14 +1522,19 @@ class SearchInfBodega(tk.Toplevel):
     def on_submit(self):
         # Valida las entradas y abre el informe()
         if validarInt(self.numero.get()):
-            numeroProducto = next(iter(listProducto()))
-            resultado = listDetalle(self.numero.get(), numeroProducto)
-            if resultado:
-                window = SearchInfBodegaCont(self, resultado)
-                place_window_center(window)
-                window.grab_set()
-            else:
-                submit(self, "No se pudo encontrar la bodega")
+            try:
+                numeroProducto = next(iter(listProducto()))
+                resultado = listDetalle(self.numero.get(), numeroProducto)
+                if resultado:
+                    window = SearchInfBodegaCont(self, resultado)
+                    place_window_center(window)
+                    window.grab_set()
+                else:
+                    submit(self, "No se pudo encontrar la bodega")
+            except:
+                submit(
+                    self, "Por favor, ingresa un movimiento en la bodega seleccionada"
+                )
         else:
             datosValidos(self)
 
@@ -1595,6 +1648,251 @@ class SearchInfBodegaCont(tk.Toplevel):
         else:
             self.filter_results_view(self.resultado, self.filtro.get().capitalize())
             self.filtroEntry.delete(0, END)
+
+
+class MenuBodeguero(tk.Toplevel):
+    def __init__(self, parent, resu):
+        super().__init__(parent, padx=20, pady=10)
+
+        # form header
+        hdr_txt = f"Bienvenido Sr/Sra {resu.getNombre().capitalize()} {resu.getApellido().capitalize()}"
+        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
+        hdr.pack(fill=X, pady=10)
+
+        # Contenedor menú row 1
+        containerRow1 = ttk.Frame(self)
+        containerRow1.pack(fill=X, expand=YES, pady=(15, 10))
+
+        self.create_buttonbox(
+            containerRow1, "Movimiento\nEntrada", self.movEntrada, "mov"
+        )
+        self.create_buttonbox(
+            containerRow1, "Movimiento\nSalida", self.movSalida, "mov"
+        )
+        self.create_buttonbox(
+            containerRow1, "Movimiento\nTraslado", self.movTraslado, "mov"
+        )
+
+        # Contenedor boton
+        containerBtn = ttk.Frame(self)
+        containerBtn.pack(fill=X, expand=YES, pady=(15, 10))
+
+        self.create_buttonCancel(containerBtn, "Salir", self.on_cancel)
+
+    def create_buttonbox(self, container, title, command, img):
+        # Crear los botones
+        button = PhotoImage(file=f"img/{img}.png")
+        # button = button.subsample(2, 2)
+        menuBtn = ttk.Button(
+            master=container,
+            text=title,
+            command=command,
+            bootstyle=PRIMARY,
+            padding=10,
+            image=button,
+            compound=LEFT,
+        )
+        menuBtn.image = button  # keep a reference!
+        menuBtn.pack(side=LEFT, padx=15)
+
+    def create_buttonCancel(self, container, title, command):
+        cnl_btn = ttk.Button(
+            master=container,
+            text=title,
+            command=command,
+            bootstyle=DANGER,
+            width=6,
+        )
+        cnl_btn.pack(side=LEFT, padx=15)
+
+    def movEntrada(self):
+        window = MovEntrada(self)
+        place_window_center(window)
+        window.grab_set()
+
+    def movSalida(self):
+        window = MovSalida(self)
+        place_window_center(window)
+        window.grab_set()
+
+    def movTraslado(self):
+        window = MovTraslado(self)
+        place_window_center(window)
+        window.grab_set()
+
+    def on_cancel(self):
+        """Cancel and close the application."""
+        self.quit()
+
+
+class MovEntrada(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent, padx=20, pady=10)
+
+        listaRegistro = []
+        for a in listRegistro().values():
+            listaRegistro.append(a.getId())
+
+        listaTrabajador = []
+        for a in listTrabajador().values():
+            listaTrabajador.append(a.getRut())
+
+        self.listaProducto = []
+        for a in listProducto().values():
+            self.listaProducto.append(a.getNombre())
+
+        listaBodega = []
+        for a in listBodega().values():
+            listaBodega.append(a.getNumero())
+
+        # form variables
+        self.trabajador = ttk.StringVar(value="")
+        self.bodega = ttk.StringVar(value="")
+        self.proveedor = ttk.StringVar(value="")
+        self.cantidad = ttk.StringVar(value="")
+        self.producto = ttk.StringVar(value="")
+        self.listaDetalle = []
+        if len(listaRegistro) == 0:
+            self.idRegistro = 1
+        else:
+            self.idRegistro = listaRegistro[-1] + 1
+
+        # header and labelframe option container
+        option_text = "Ingresa los Datos del Movimiento de Entrada"
+        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
+        self.option_lf.pack(fill=X, expand=YES, anchor=N)
+
+        # form entries
+        self.trabajadorEntry = self.create_form_entry_combo(
+            "trabajador", self.trabajador, validarStr, listaTrabajador, self.option_lf
+        )
+        self.bodegaEntry = self.create_form_entry_combo(
+            "bodega", self.bodega, validarStr, listaBodega, self.option_lf
+        )
+        self.proveedorEntry = self.create_form_entry(
+            "proveedor", self.proveedor, validarStr, self.option_lf
+        )
+
+        # header and labelframe option container
+        option_text2 = "Ingresa los Productos"
+        self.option_lf2 = ttk.Labelframe(self.option_lf, text=option_text2, padding=15)
+        self.option_lf2.pack(fill=X, expand=YES, anchor=N, pady=10)
+        self.productoEntry = self.create_form_entry_combo(
+            "producto", self.producto, validarStr, self.listaProducto, self.option_lf2
+        )
+        self.cantidadEntry = self.create_form_entry(
+            "cantidad", self.cantidad, validarInt, self.option_lf2
+        )
+
+        self.create_buttonbox(self.option_lf2, "+", self.on_add, (0))
+
+        self.create_buttonbox(self.option_lf, "Crear", self.on_submit, (15, 10))
+        self.mensajeProducto = ""
+
+    def create_form_entry(self, label, variable, val, parent):
+        # Crear una entrada
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=10)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Entry(
+            master=container,
+            textvariable=variable,
+            validate="focus",
+            validatecommand=(self.register(val), "%P"),
+            width=100,
+        )
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
+
+    def create_form_entry_combo(self, label, variable, val, list, parent):
+        # Crear una entrada
+
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=10)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Combobox(
+            master=container,
+            textvariable=variable,
+            validate="focus",
+            validatecommand=(self.register(val), "%P"),
+            values=list,
+            state=READONLY,
+        )
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
+
+    def create_buttonbox(self, parent, label, command, pad):
+        # Crear los botones
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=pad)
+
+        sub_btn = ttk.Button(
+            master=container,
+            text=label,
+            command=command,
+            bootstyle=SUCCESS,
+            width=6,
+        )
+        sub_btn.pack(side=RIGHT, padx=5)
+
+    def on_submit(self):
+        # Valida las entradas y llama la función createEntrada()
+
+        if (
+            validarStr(self.proveedor.get())
+            and validarStr(self.bodega.get())
+            and validarStr(self.trabajador.get())
+            and len(self.listaDetalle) != 0
+        ):
+            confirmar = pregunta(
+                self,
+                f"""Movimiento de Entrada\nId: {self.idRegistro}\nProveedor: {self.proveedor.get()}\nBodega destino: {self.bodega.get()}\nTrabajador encargado: {self.trabajador.get()}\nProductos: \n{self.mensajeProducto}¿Están bien éstos datos?""",
+            )
+            if confirmar == "Si":
+                bodega = findBodega(self.bodega.get()).getNumero()
+                id = createEntrada(
+                    self.idRegistro,
+                    self.proveedor.get(),
+                    bodega,
+                    self.trabajador.get(),
+                )
+
+                if id:
+                    mensaje = createDetalle(self.listaDetalle, id)
+            elif confirmar == "No":
+                mensaje = "No se realizó el movimiento"
+            submit(self, mensaje)
+            self.destroy()
+
+        else:
+            datosValidos(self)
+
+    def on_add(self):
+        if validarStr(self.producto.get()) and validarInt(self.cantidad.get()):
+            producto = findProductoNum(self.producto.get()).getNumero()
+            self.listaDetalle.append(
+                {"numeroProducto": producto, "cantidadProducto": self.cantidad.get()}
+            )
+
+            self.mensajeProducto += (
+                f"Nombre: {self.producto.get()} - Cantidad: {self.cantidad.get()}\n"
+            )
+
+            self.cantidadEntry.delete(0, END)
+            self.productoEntry.set("")
+
+            submit(self, "Producto añadido correctamente")
+
+        else:
+            datosValidos(self)
 
 
 if __name__ == "__main__":

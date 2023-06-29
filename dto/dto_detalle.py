@@ -9,3 +9,10 @@ class DetalleDTO:
             DetalleMovimiento(numeroBodega=bodega, numeroProducto=numeroProducto)
         )
         return resu
+
+    def createDetalle(self, lista, registro):
+        daoDetalle = DaoDetalle()
+        resultado = daoDetalle.addDetalle(
+            DetalleMovimiento(nombreProducto=lista, registro=registro)
+        )
+        return resultado

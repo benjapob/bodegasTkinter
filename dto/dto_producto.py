@@ -45,3 +45,8 @@ class ProductoDTO:
         daoProducto = DaoProducto()
         resultado = daoProducto.findProducto(Producto(numero=numero))
         return resultado if resultado is not None else None
+
+    def findProductoNum(self, nombre):
+        daoProducto = DaoProducto()
+        resultado = daoProducto.findProductoNum(Producto(nombre=nombre.upper()))
+        return resultado if resultado is not None else None

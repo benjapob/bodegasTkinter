@@ -1,5 +1,6 @@
 from conex import conn
 import traceback
+from modelo.trabajador import Trabajador
 
 
 class TrDAO:
@@ -46,4 +47,41 @@ class TrDAO:
             if c.getConex().is_connected():
                 c.closeConex()
 
+        return resultado
+
+    def listTrabajador(self):
+        c = self.getConex()
+        lista = {}
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute("select rutTrabajador from trabajador")
+            resultado = cursor.fetchall()
+            if resultado is not None:
+                for a in resultado:
+                    e = Trabajador(rut=a[0])
+                    lista[a[0]] = e
+        except Exception as ex:
+            print(traceback.print_exc())
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return lista
+
+    def findTrabajador(self, trabajador):
+        c = self.getConex()
+        resultado = None
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(
+                f"select rutTrabajador from trabajador where nombreTrabajador = {trabajador.getNombre()} and apellidoTrabajador = {trabajador.getApellido()}"
+            )
+            resultado = cursor.fetchall()
+            if resultado is not None:
+                for a in resultado:
+                    resultado = Trabajador(rut=a[0])
+        except Exception as ex:
+            print(traceback.print_exc())
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
         return resultado

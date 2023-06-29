@@ -10,6 +10,7 @@ class DetalleMovimiento:
         nombreCategoria="",
         numeroBodega="",
         nombreTipo="",
+        registro="",
     ):
         self.__id = id
         self.__numeroProducto = numeroProducto
@@ -19,6 +20,7 @@ class DetalleMovimiento:
         self.__nombreCategoria = nombreCategoria
         self.__numeroBodega = numeroBodega
         self.__nombreTipo = nombreTipo
+        self.__registro = registro
 
     # Funcion str para hacer print al objeto
 
@@ -50,6 +52,9 @@ class DetalleMovimiento:
     def getNombreTipo(self):
         return self.__nombreTipo
 
+    def getRegistro(self):
+        return self.__registro
+
     # Setterr
     def setId(self, id):
         self.__id = id
@@ -74,3 +79,6 @@ class DetalleMovimiento:
 
     def setNombreTipo(self, nombreTipo):
         self.__nombreTipo = nombreTipo
+
+    def setRegistro(self, registro):
+        self.__registro = registro

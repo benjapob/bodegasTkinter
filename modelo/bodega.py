@@ -10,7 +10,7 @@ class Bodega:
     # Funcion str para hacer print al objeto
 
     def __str__(self) -> str:
-        return f"{self.__id} {self.__capacidad} {self.__num}{self.__trabajador}"
+        return f"{self.__id} {self.__capacidad} {self.__numero}{self.__trabajador}"
 
     # Getters
     def getId(self):
