@@ -6,7 +6,7 @@ class RegistroMovimiento:
         fecha="",
         tiendaDestino="",
         proveedor="",
-        bodegaOrigenDestino="",
+        bodegaOrigen="",
         tipo="",
         bodega="",
         trabajador="",
@@ -15,7 +15,7 @@ class RegistroMovimiento:
         self.__fecha = fecha
         self.__tiendaDestino = tiendaDestino
         self.__proveedor = proveedor
-        self.__bodegaOrigenDestino = bodegaOrigenDestino
+        self.__bodegaOrigen = bodegaOrigen
         self.__tipo = tipo
         self.__bodega = bodega
         self.__trabajador = trabajador
@@ -23,7 +23,7 @@ class RegistroMovimiento:
     # Funcion str para hacer print al objeto
 
     def __str__(self) -> str:
-        return f"{self.__id} {self.__fecha} {self.__tiendaDestino} {self.__proveedor} {self.__bodegaOrigenDestino} {self.__tipo} {self.__bodega} {self.__trabajador}"
+        return f"{self.__id} {self.__fecha} {self.__tiendaDestino} {self.__proveedor} {self.__bodegaOrigen} {self.__tipo} {self.__bodega} {self.__trabajador}"
 
     # Getters
     def getId(self):
@@ -38,8 +38,8 @@ class RegistroMovimiento:
     def getProveedor(self):
         return self.__proveedor
 
-    def getBodegaOrigenDestino(self):
-        return self.__bodegaOrigenDestino
+    def getbodegaOrigen(self):
+        return self.__bodegaOrigen
 
     def getTipo(self):
         return self.__tipo
@@ -66,8 +66,8 @@ class RegistroMovimiento:
         self.__proveedor = proveedor
         self.__id = id
 
-    def setBodegaOrigenDestino(self, bodegaOrigenDestino):
-        self.__bodegaOrigenDestino = bodegaOrigenDestino
+    def setbodegaOrigen(self, bodegaOrigen):
+        self.__bodegaOrigen = bodegaOrigen
 
     def setTipo(self, tipo):
         self.__tipo = tipo

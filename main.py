@@ -122,9 +122,9 @@ def listTrabajador():
     return resultado
 
 
-def findTrabajador(nombre, apellido):
-    "Busca una Trabajador por su nombre"
-    resultado = TrDTO().findTrabajador(nombre, apellido)
+def findTrabajador(rut):
+    "Busca una Trabajador por su rut"
+    resultado = TrDTO().findTrabajador(rut)
     return resultado
 
 
@@ -259,6 +259,24 @@ def createEntrada(id, proveedor, bodega, trabajador):
     después irá a la base de datos y creara la Entrada"""
 
     resultado = RegistroDTO().createEntrada(id, proveedor, bodega, trabajador)
+    return resultado
+
+
+def createSalida(id, tienda, bodega, trabajador):
+    """Crea un Salida con un numero y una capacidad
+    después irá a la base de datos y creara la Salida"""
+
+    resultado = RegistroDTO().createSalida(id, tienda, bodega, trabajador)
+    return resultado
+
+
+def createTraslado(id, bodegaOrigen, bodegaDestino, trabajador):
+    """Crea un Traslado con un numero y una capacidad
+    después irá a la base de datos y creara la Traslado"""
+
+    resultado = RegistroDTO().createTraslado(
+        id, bodegaOrigen, bodegaDestino, trabajador
+    )
     return resultado
 
 
@@ -1420,26 +1438,6 @@ class SearchInfGeneral(tk.Toplevel):
         self.resultview.column(column=4, anchor=W, stretch=False)
         self.resultview.column(column=5, anchor=W, stretch=False)
 
-        # insert falso
-
-        iid = self.resultview.insert(
-            parent="",
-            index=END,
-        )
-
-        self.resultview.item(
-            iid,
-            open=True,
-            values=[
-                1,
-                "22/04/2023",
-                "Bodega 1",
-                "Bodega 2",
-                "Entrada",
-                "Benjamin Poblete",
-            ],
-        )
-
     def update_results_view(self):
         for item in self.resultview.get_children():
             self.resultview.delete(item)
@@ -1450,14 +1448,14 @@ class SearchInfGeneral(tk.Toplevel):
             )
             match a.getTipo():
                 case "Entrada":
-                    origen = a.getProveedor()
-                    destino = f"Bodega {a.getBodega()}"
+                    origen = f"Proveedor: {a.getProveedor()}"
+                    destino = f"Bodega: {a.getBodega()}"
                 case "Salida":
-                    origen = f"Bodega {a.getBodega()}"
-                    destino = a.getTiendaDestino()
+                    origen = f"Bodega: {a.getBodega()}"
+                    destino = f"Tienda: {a.getTiendaDestino()}"
                 case "Traslado":
-                    origen = f"Bodega {a.getBodegaOrigenDestino()}"
-                    destino = f"Bodega {a.getBodega()}"
+                    origen = f"Bodega: {a.getbodegaOrigen()}"
+                    destino = f"Bodega: {a.getBodega()}"
 
             self.resultview.item(
                 iid,
@@ -1530,11 +1528,12 @@ class SearchInfBodega(tk.Toplevel):
                     place_window_center(window)
                     window.grab_set()
                 else:
-                    submit(self, "No se pudo encontrar la bodega")
+                    submit(
+                        self,
+                        "No se pudo encontrar la bodega o no tiene productos asociados",
+                    )
             except:
-                submit(
-                    self, "Por favor, ingresa un movimiento en la bodega seleccionada"
-                )
+                submit(self, "Por favor, ingresa un movimiento")
         else:
             datosValidos(self)
 
@@ -1549,7 +1548,7 @@ class SearchInfBodegaCont(tk.Toplevel):
         self.filtro = ttk.StringVar(value="")
 
         # header and labelframe option container
-        option_text = "Buscar movimientos generales"
+        option_text = "Movimientos por Bodega"
         self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
         self.option_lf.pack(fill=X, expand=YES, anchor=N)
 
@@ -1602,6 +1601,7 @@ class SearchInfBodegaCont(tk.Toplevel):
     def update_results_view(self, resultado):
         for item in self.resultview.get_children():
             self.resultview.delete(item)
+
         for a in resultado.values():
             iid = self.resultview.insert(
                 parent="",
@@ -1764,13 +1764,17 @@ class MovEntrada(tk.Toplevel):
 
         # form entries
         self.trabajadorEntry = self.create_form_entry_combo(
-            "trabajador", self.trabajador, validarStr, listaTrabajador, self.option_lf
-        )
-        self.bodegaEntry = self.create_form_entry_combo(
-            "bodega", self.bodega, validarStr, listaBodega, self.option_lf
+            "trabajador\nencargado",
+            self.trabajador,
+            validarStr,
+            listaTrabajador,
+            self.option_lf,
         )
         self.proveedorEntry = self.create_form_entry(
             "proveedor", self.proveedor, validarStr, self.option_lf
+        )
+        self.bodegaEntry = self.create_form_entry_combo(
+            "bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
         )
 
         # header and labelframe option container
@@ -1794,7 +1798,7 @@ class MovEntrada(tk.Toplevel):
         container = ttk.Frame(parent)
         container.pack(fill=X, expand=YES, pady=5)
 
-        lbl = ttk.Label(master=container, text=label.title(), width=10)
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
         lbl.pack(side=LEFT, padx=5)
 
         ent = ttk.Entry(
@@ -1814,7 +1818,7 @@ class MovEntrada(tk.Toplevel):
         container = ttk.Frame(parent)
         container.pack(fill=X, expand=YES, pady=5)
 
-        lbl = ttk.Label(master=container, text=label.title(), width=10)
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
         lbl.pack(side=LEFT, padx=5)
 
         ent = ttk.Combobox(
@@ -1857,12 +1861,372 @@ class MovEntrada(tk.Toplevel):
                 f"""Movimiento de Entrada\nId: {self.idRegistro}\nProveedor: {self.proveedor.get()}\nBodega destino: {self.bodega.get()}\nTrabajador encargado: {self.trabajador.get()}\nProductos: \n{self.mensajeProducto}¿Están bien éstos datos?""",
             )
             if confirmar == "Si":
+                trabajador = findTrabajador(self.trabajador.get()).getId()
                 bodega = findBodega(self.bodega.get()).getNumero()
                 id = createEntrada(
                     self.idRegistro,
                     self.proveedor.get(),
                     bodega,
-                    self.trabajador.get(),
+                    trabajador,
+                )
+
+                if id:
+                    mensaje = createDetalle(self.listaDetalle, id)
+            elif confirmar == "No":
+                mensaje = "No se realizó el movimiento"
+            submit(self, mensaje)
+            self.destroy()
+
+        else:
+            datosValidos(self)
+
+    def on_add(self):
+        if validarStr(self.producto.get()) and validarInt(self.cantidad.get()):
+            producto = findProductoNum(self.producto.get()).getNumero()
+            self.listaDetalle.append(
+                {"numeroProducto": producto, "cantidadProducto": self.cantidad.get()}
+            )
+
+            self.mensajeProducto += (
+                f"Nombre: {self.producto.get()} - Cantidad: {self.cantidad.get()}\n"
+            )
+
+            self.cantidadEntry.delete(0, END)
+            self.productoEntry.set("")
+
+            submit(self, "Producto añadido correctamente")
+
+        else:
+            datosValidos(self)
+
+
+class MovSalida(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent, padx=20, pady=10)
+
+        listaRegistro = []
+        for a in listRegistro().values():
+            listaRegistro.append(a.getId())
+
+        listaTrabajador = []
+        for a in listTrabajador().values():
+            listaTrabajador.append(a.getRut())
+
+        self.listaProducto = []
+        for a in listProducto().values():
+            self.listaProducto.append(a.getNombre())
+
+        listaBodega = []
+        for a in listBodega().values():
+            listaBodega.append(a.getNumero())
+
+        # form variables
+        self.trabajador = ttk.StringVar(value="")
+        self.bodega = ttk.StringVar(value="")
+        self.tienda = ttk.StringVar(value="")
+        self.cantidad = ttk.StringVar(value="")
+        self.producto = ttk.StringVar(value="")
+        self.listaDetalle = []
+        if len(listaRegistro) == 0:
+            self.idRegistro = 1
+        else:
+            self.idRegistro = listaRegistro[-1] + 1
+
+        # header and labelframe option container
+        option_text = "Ingresa los Datos del Movimiento de Salida"
+        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
+        self.option_lf.pack(fill=X, expand=YES, anchor=N)
+
+        # form entries
+        self.trabajadorEntry = self.create_form_entry_combo(
+            "trabajador\nencargado",
+            self.trabajador,
+            validarStr,
+            listaTrabajador,
+            self.option_lf,
+        )
+        self.bodegaEntry = self.create_form_entry_combo(
+            "bodega origen", self.bodega, validarStr, listaBodega, self.option_lf
+        )
+        self.tiendaEntry = self.create_form_entry(
+            "tienda destino", self.tienda, validarStr, self.option_lf
+        )
+
+        # header and labelframe option container
+        option_text2 = "Ingresa los Productos"
+        self.option_lf2 = ttk.Labelframe(self.option_lf, text=option_text2, padding=15)
+        self.option_lf2.pack(fill=X, expand=YES, anchor=N, pady=10)
+        self.productoEntry = self.create_form_entry_combo(
+            "producto", self.producto, validarStr, self.listaProducto, self.option_lf2
+        )
+        self.cantidadEntry = self.create_form_entry(
+            "cantidad", self.cantidad, validarInt, self.option_lf2
+        )
+
+        self.create_buttonbox(self.option_lf2, "+", self.on_add, (0))
+
+        self.create_buttonbox(self.option_lf, "Crear", self.on_submit, (15, 10))
+        self.mensajeProducto = ""
+
+    def create_form_entry(self, label, variable, val, parent):
+        # Crear una entrada
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Entry(
+            master=container,
+            textvariable=variable,
+            validate="focus",
+            validatecommand=(self.register(val), "%P"),
+            width=100,
+        )
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
+
+    def create_form_entry_combo(self, label, variable, val, list, parent):
+        # Crear una entrada
+
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Combobox(
+            master=container,
+            textvariable=variable,
+            validate="focus",
+            validatecommand=(self.register(val), "%P"),
+            values=list,
+            state=READONLY,
+        )
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
+
+    def create_buttonbox(self, parent, label, command, pad):
+        # Crear los botones
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=pad)
+
+        sub_btn = ttk.Button(
+            master=container,
+            text=label,
+            command=command,
+            bootstyle=SUCCESS,
+            width=6,
+        )
+        sub_btn.pack(side=RIGHT, padx=5)
+
+    def on_submit(self):
+        # Valida las entradas y llama la función createSalida()
+
+        if (
+            validarStr(self.tienda.get())
+            and validarStr(self.bodega.get())
+            and validarStr(self.trabajador.get())
+            and len(self.listaDetalle) != 0
+        ):
+            confirmar = pregunta(
+                self,
+                f"""Movimiento de Salida\nId: {self.idRegistro}\nBodega Origen: {self.bodega.get()}\nTienda Destino: {self.tienda.get()}\nTrabajador encargado: {self.trabajador.get()}\nProductos: \n{self.mensajeProducto}¿Están bien éstos datos?""",
+            )
+            if confirmar == "Si":
+                bodega = findBodega(self.bodega.get()).getNumero()
+                trabajador = findTrabajador(self.trabajador.get()).getId()
+                id = createSalida(
+                    self.idRegistro,
+                    self.tienda.get(),
+                    bodega,
+                    trabajador,
+                )
+
+                if id:
+                    mensaje = createDetalle(self.listaDetalle, id)
+            elif confirmar == "No":
+                mensaje = "No se realizó el movimiento"
+            submit(self, mensaje)
+            self.destroy()
+
+        else:
+            datosValidos(self)
+
+    def on_add(self):
+        if validarStr(self.producto.get()) and validarInt(self.cantidad.get()):
+            producto = findProductoNum(self.producto.get()).getNumero()
+            self.listaDetalle.append(
+                {"numeroProducto": producto, "cantidadProducto": self.cantidad.get()}
+            )
+
+            self.mensajeProducto += (
+                f"Nombre: {self.producto.get()} - Cantidad: {self.cantidad.get()}\n"
+            )
+
+            self.cantidadEntry.delete(0, END)
+            self.productoEntry.set("")
+
+            submit(self, "Producto añadido correctamente")
+
+        else:
+            datosValidos(self)
+
+
+class MovTraslado(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent, padx=20, pady=10)
+
+        listaRegistro = []
+        for a in listRegistro().values():
+            listaRegistro.append(a.getId())
+
+        listaTrabajador = []
+        for a in listTrabajador().values():
+            listaTrabajador.append(a.getRut())
+
+        self.listaProducto = []
+        for a in listProducto().values():
+            self.listaProducto.append(a.getNombre())
+
+        listaBodega = []
+        for a in listBodega().values():
+            listaBodega.append(a.getNumero())
+
+        # form variables
+        self.trabajador = ttk.StringVar(value="")
+        self.bodega = ttk.StringVar(value="")
+        self.bodegaOrigen = ttk.StringVar(value="")
+        self.cantidad = ttk.StringVar(value="")
+        self.producto = ttk.StringVar(value="")
+        self.listaDetalle = []
+        if len(listaRegistro) == 0:
+            self.idRegistro = 1
+        else:
+            self.idRegistro = listaRegistro[-1] + 1
+
+        # header and labelframe option container
+        option_text = "Ingresa los Datos del Movimiento de Traslado"
+        self.option_lf = ttk.Labelframe(self, text=option_text, padding=15)
+        self.option_lf.pack(fill=X, expand=YES, anchor=N)
+
+        # form entries
+        self.trabajadorEntry = self.create_form_entry_combo(
+            "trabajador\nencargado",
+            self.trabajador,
+            validarStr,
+            listaTrabajador,
+            self.option_lf,
+        )
+        self.bodegaOrigenEntry = self.create_form_entry(
+            "bodega origen", self.bodegaOrigen, validarInt, self.option_lf
+        )
+        self.bodegaEntry = self.create_form_entry_combo(
+            "bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
+        )
+
+        # header and labelframe option container
+        option_text2 = "Ingresa los Productos"
+        self.option_lf2 = ttk.Labelframe(self.option_lf, text=option_text2, padding=15)
+        self.option_lf2.pack(fill=X, expand=YES, anchor=N, pady=10)
+        self.productoEntry = self.create_form_entry_combo(
+            "producto", self.producto, validarStr, self.listaProducto, self.option_lf2
+        )
+        self.cantidadEntry = self.create_form_entry(
+            "cantidad", self.cantidad, validarInt, self.option_lf2
+        )
+
+        self.create_buttonbox(self.option_lf2, "+", self.on_add, (0))
+
+        self.create_buttonbox(self.option_lf, "Crear", self.on_submit, (15, 10))
+        self.mensajeProducto = ""
+
+    def create_form_entry(self, label, variable, val, parent):
+        # Crear una entrada
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Entry(
+            master=container,
+            textvariable=variable,
+            validate="focus",
+            validatecommand=(self.register(val), "%P"),
+            width=100,
+        )
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
+
+    def create_form_entry_combo(self, label, variable, val, list, parent):
+        # Crear una entrada
+
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Combobox(
+            master=container,
+            textvariable=variable,
+            validate="focus",
+            validatecommand=(self.register(val), "%P"),
+            values=list,
+            state=READONLY,
+        )
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+        return ent
+
+    def create_buttonbox(self, parent, label, command, pad):
+        # Crear los botones
+        container = ttk.Frame(parent)
+        container.pack(fill=X, expand=YES, pady=pad)
+
+        sub_btn = ttk.Button(
+            master=container,
+            text=label,
+            command=command,
+            bootstyle=SUCCESS,
+            width=6,
+        )
+        sub_btn.pack(side=RIGHT, padx=5)
+
+    def on_submit(self):
+        # Valida las entradas y llama la función createSalida()
+
+        if (
+            validarStr(self.trabajador.get())
+            and validarStr(self.bodega.get())
+            and validarInt(self.bodegaOrigen.get())
+            and len(self.listaDetalle) != 0
+        ):
+            confirmar = pregunta(
+                self,
+                f"""Movimiento de Traslado\nId: {self.idRegistro}\nBodega Origen: {self.bodegaOrigen.get()}\nBodega Destino: {self.bodega.get()}\nTrabajador encargado: {self.trabajador.get()}\nProductos: \n{self.mensajeProducto}¿Están bien éstos datos?""",
+            )
+            if confirmar == "Si":
+                bodegaDestino = findBodega(self.bodega.get()).getNumero()
+                bodegaOrigen = findBodega(self.bodegaOrigen.get())
+                if bodegaOrigen is None:
+                    submit(
+                        self,
+                        "Bodega no encontrada, por favor realizar otra vez el movimiento",
+                    )
+                    self.destroy()
+                else:
+                    bodegaOrigen = bodegaOrigen.getNumero()
+                trabajador = findTrabajador(self.trabajador.get()).getId()
+                id = createTraslado(
+                    self.idRegistro,
+                    bodegaOrigen,
+                    bodegaDestino,
+                    trabajador,
                 )
 
                 if id:

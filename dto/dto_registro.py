@@ -12,7 +12,31 @@ class RegistroDTO:
         daoRegistro = DaoRegistro()
         resultado = daoRegistro.addEntrada(
             RegistroMovimiento(
-                id=id, proveedor=proveedor, bodega=bodega, trabajador=trabajador
+                id=id, proveedor=proveedor.upper(), bodega=bodega, trabajador=trabajador
+            )
+        )
+        return resultado
+
+    def createSalida(self, id, tienda, bodega, trabajador):
+        daoRegistro = DaoRegistro()
+        resultado = daoRegistro.addSalida(
+            RegistroMovimiento(
+                id=id,
+                tiendaDestino=tienda.upper(),
+                bodega=bodega,
+                trabajador=trabajador,
+            )
+        )
+        return resultado
+
+    def createTraslado(self, id, bodegaOrigen, bodegaDestino, trabajador):
+        daoRegistro = DaoRegistro()
+        resultado = daoRegistro.addTraslado(
+            RegistroMovimiento(
+                id=id,
+                bodegaOrigen=bodegaOrigen,
+                bodega=bodegaDestino,
+                trabajador=trabajador,
             )
         )
         return resultado

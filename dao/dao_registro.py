@@ -21,7 +21,7 @@ class DaoRegistro:
             cursor = c.getConex().cursor()
             cursor.execute(
                 """select reg.idRegistro, reg.fechaCreacion, reg.tiendaDestino, reg.proveedor, 
-                    reg.bodegaOrigenDestino, tipo.nombreTipo, bod.numeroBodega, tr.nombreTrabajador, tr.apellidoTrabajador 
+                    reg.bodegaOrigen, tipo.nombreTipo, bod.numeroBodega, tr.nombreTrabajador, tr.apellidoTrabajador 
                     from registroMovimiento reg, tipoMovimiento tipo, bodega bod, trabajador tr 
                     where reg.idTipo = tipo.idTipo 
                     and reg.idBodega = bod.idBodega 
@@ -36,7 +36,7 @@ class DaoRegistro:
                         fecha=a[1],
                         tiendaDestino=a[2].capitalize(),
                         proveedor=a[3].capitalize(),
-                        bodegaOrigenDestino=a[4],
+                        bodegaOrigen=a[4],
                         tipo=a[5].capitalize(),
                         bodega=a[6],
                         trabajador=Trabajador(
@@ -53,7 +53,7 @@ class DaoRegistro:
 
     def addEntrada(self, registroMovimiento):
         sql = """insert into registroMovimiento 
-        (`idRegistro`, `tiendaDestino`, `proveedor`, `bodegaOrigenDestino`, `idTipo`, `idBodega`, `idTrabajador`)  
+        (`idRegistro`, `tiendaDestino`, `proveedor`, `bodegaOrigen`, `idTipo`, `idBodega`, `idTrabajador`)  
         values (%s,'', %s, '', 1, %s, %s)"""
         id = registroMovimiento.getId()
         c = self.getConex()
@@ -65,6 +65,84 @@ class DaoRegistro:
                 (
                     id,
                     registroMovimiento.getProveedor(),
+                    registroMovimiento.getBodega(),
+                    registroMovimiento.getTrabajador(),
+                ),
+            )
+            c.getConex().commit()
+            filas = cursor.rowcount
+
+            if filas > 0:
+                mensaje = id
+            else:
+                mensaje = "No se realizaron cambios"
+
+        except Exception as ex:
+            print(traceback.print_exc())
+            ex = str(ex)
+
+            if ex.startswith("1062"):
+                mensaje = "Dato duplicado\nPor favor, ingresa un valor distinto"
+            else:
+                mensaje = "Problemas con la base de datos\nVuelva a intentarlo"
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return mensaje
+
+    def addSalida(self, registroMovimiento):
+        sql = """insert into registroMovimiento 
+        (`idRegistro`, `tiendaDestino`, `proveedor`, `bodegaOrigen`, `idTipo`, `idBodega`, `idTrabajador`)  
+        values (%s,%s,'', '', 2, %s, %s)"""
+        id = registroMovimiento.getId()
+        c = self.getConex()
+        mensaje = ""
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(
+                sql,
+                (
+                    id,
+                    registroMovimiento.getTiendaDestino(),
+                    registroMovimiento.getBodega(),
+                    registroMovimiento.getTrabajador(),
+                ),
+            )
+            c.getConex().commit()
+            filas = cursor.rowcount
+
+            if filas > 0:
+                mensaje = id
+            else:
+                mensaje = "No se realizaron cambios"
+
+        except Exception as ex:
+            print(traceback.print_exc())
+            ex = str(ex)
+
+            if ex.startswith("1062"):
+                mensaje = "Dato duplicado\nPor favor, ingresa un valor distinto"
+            else:
+                mensaje = "Problemas con la base de datos\nVuelva a intentarlo"
+        finally:
+            if c.getConex().is_connected():
+                c.closeConex()
+        return mensaje
+
+    def addTraslado(self, registroMovimiento):
+        sql = """insert into registroMovimiento 
+        (`idRegistro`, `tiendaDestino`, `proveedor`, `bodegaOrigen`, `idTipo`, `idBodega`, `idTrabajador`)  
+        values (%s,'','', %s, 3, %s, %s)"""
+        id = registroMovimiento.getId()
+        c = self.getConex()
+        mensaje = ""
+        try:
+            cursor = c.getConex().cursor()
+            cursor.execute(
+                sql,
+                (
+                    id,
+                    registroMovimiento.getbodegaOrigen(),
                     registroMovimiento.getBodega(),
                     registroMovimiento.getTrabajador(),
                 ),

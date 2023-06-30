@@ -10,7 +10,9 @@ class TrDTO:
 
     def validarLogin(self, correo, contraseña):
         daoTr = TrDAO()
-        resultado = daoTr.validarLogin(Trabajador(correo=correo, contraseña=contraseña))
+        resultado = daoTr.validarLogin(
+            Trabajador(correo=correo.upper(), contraseña=contraseña.upper())
+        )
         return (
             Trabajador(
                 nombre=resultado[0],
@@ -27,9 +29,7 @@ class TrDTO:
         daoTr = TrDAO()
         daoTr.aceptaTerminos(Trabajador(id=id))
 
-    def findTrabajador(self, nombre, apellido):
+    def findTrabajador(self, rut):
         daoTrabajador = TrDAO()
-        resultado = daoTrabajador.findTrabajador(
-            Trabajador(nombre=nombre, apellido=apellido)
-        )
+        resultado = daoTrabajador.findTrabajador(Trabajador(rut=rut.upper()))
         return resultado if resultado is not None else None

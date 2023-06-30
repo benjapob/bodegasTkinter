@@ -102,10 +102,9 @@ class DaoBodega:
             cursor.execute(
                 f"select numerobodega, capacidadbodega from bodega where numerobodega = {bodega.getNumero()}"
             )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Bodega(numero=a[0], capacidad=a[1])
+            resu = cursor.fetchone()
+            if resu is not None:
+                resultado = Bodega(numero=resu[0], capacidad=resu[1])
         except Exception as ex:
             print(traceback.print_exc())
         finally:

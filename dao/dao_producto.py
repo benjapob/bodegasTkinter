@@ -178,16 +178,15 @@ class DaoProducto:
                                 and pro.numeroProducto = {producto.getNumero()}
                                 order by pro.idProducto; """
             )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Producto(
-                        a[0],
-                        a[1].capitalize(),
-                        a[2].capitalize(),
-                        a[3].capitalize(),
-                        a[4].capitalize(),
-                    )
+            resu = cursor.fetchone()
+            if resu is not None:
+                resultado = Producto(
+                    resu[0],
+                    resu[1].capitalize(),
+                    resu[2].capitalize(),
+                    resu[3].capitalize(),
+                    resu[4].capitalize(),
+                )
         except Exception as ex:
             print(traceback.print_exc())
         finally:

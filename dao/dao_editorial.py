@@ -104,10 +104,9 @@ class DaoEditorial:
             cursor.execute(
                 f"select numeroEditorial, nombreEditorial from editorial where numeroEditorial = {editorial.getNumero()}"
             )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Editorial(numero=a[0], nombre=a[1].capitalize())
+            resu = cursor.fetchone()
+            if resu is not None:
+                resultado = Editorial(numero=resu[0], nombre=resu[1].capitalize())
         except Exception as ex:
             print(traceback.print_exc())
         finally:
@@ -123,10 +122,9 @@ class DaoEditorial:
             cursor.execute(
                 f"select idEditorial, nombreEditorial from editorial where nombreEditorial = '{editorial.getNombre()}'"
             )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Editorial(id=a[0], nombre=a[1].capitalize())
+            resu = cursor.fetchone()
+            if resu is not None:
+                resultado = Editorial(id=resu[0], nombre=resu[1].capitalize())
         except Exception as ex:
             print(traceback.print_exc())
         finally:

@@ -73,12 +73,11 @@ class TrDAO:
         try:
             cursor = c.getConex().cursor()
             cursor.execute(
-                f"select rutTrabajador from trabajador where nombreTrabajador = {trabajador.getNombre()} and apellidoTrabajador = {trabajador.getApellido()}"
+                f"select idTrabajador from trabajador where rutTrabajador = '{trabajador.getRut()}'"
             )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Trabajador(rut=a[0])
+            resu = cursor.fetchone()
+            if resu is not None:
+                resultado = Trabajador(id=resu[0])
         except Exception as ex:
             print(traceback.print_exc())
         finally:

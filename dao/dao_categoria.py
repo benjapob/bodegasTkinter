@@ -39,10 +39,9 @@ class DaoCategoria:
             cursor.execute(
                 f"select idcategoria from categoria where nombrecategoria = '{categoria.getNombre()}' "
             )
-            resultado = cursor.fetchall()
-            if resultado is not None:
-                for a in resultado:
-                    resultado = Categoria(id=a[0])
+            resu = cursor.fetchone()
+            if resu is not None:
+                resultado = Categoria(id=resu[0])
         except Exception as ex:
             print(traceback.print_exc())
         finally:

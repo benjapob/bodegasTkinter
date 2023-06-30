@@ -30,15 +30,15 @@ class DaoDetalle:
             cursor = c.getConex().cursor()
             cursor.execute(
                 f"""select pro.numeroProducto, pro.nombreProducto, det.cantidadProducto,
-                    ed.nombreEditorial, cat.nombreCategoria, bod.numeroBodega, tipo.nombreTipo, reg.bodegaOrigenDestino
-                    from detalleMovimiento det, detalleMovimiento reg, bodega bod, producto pro, editorial ed, categoria cat, tipoMovimiento tipo
+                    ed.nombreEditorial, cat.nombreCategoria, bod.numeroBodega, tipo.nombreTipo, reg.bodegaOrigen, det.idDetalle
+                    from detalleMovimiento det, registroMovimiento reg, bodega bod, producto pro, editorial ed, categoria cat, tipoMovimiento tipo
                     where det.idRegistro = reg.idRegistro 
                     and det.idProducto = pro.idProducto 
                     and reg.idBodega = bod.idBodega  
                     and pro.idEditorial = ed.idEditorial  
                     and pro.idCategoria = cat.idCategoria 
                     and reg.idTipo = tipo.idTipo
-                    and (bod.numeroBodega = {detalle.getNumeroBodega()} or reg.bodegaOrigenDestino = {detalle.getNumeroBodega()})
+                    and (bod.numeroBodega = {detalle.getNumeroBodega()} or reg.bodegaOrigen = {detalle.getNumeroBodega()})
                     order by det.idDetalle;"""
             )
             resultado = cursor.fetchall()
@@ -47,6 +47,8 @@ class DaoDetalle:
                 for a in resultado:
                     if e.getNumeroProducto() != a[0]:
                         cantidad = 0
+                    if a[0] in lista.keys():
+                        cantidad = lista[a[0]].getCantidadProducto()
 
                     match a[6].capitalize():
                         case "Entrada":
@@ -66,6 +68,7 @@ class DaoDetalle:
                         nombreCategoria=a[4].capitalize(),
                         numeroBodega=a[5],
                         nombreTipo=a[6].capitalize(),
+                        id=a[8],
                     )
                     lista[a[0]] = e
         except Exception as ex:
