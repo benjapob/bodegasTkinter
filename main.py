@@ -2214,23 +2214,21 @@ class MovTraslado(tk.Toplevel):
                 bodegaDestino = findBodega(self.bodega.get()).getNumero()
                 bodegaOrigen = findBodega(self.bodegaOrigen.get())
                 if bodegaOrigen is None:
-                    submit(
-                        self,
-                        "Bodega no encontrada, por favor realizar otra vez el movimiento",
-                    )
-                    self.destroy()
+                    mensaje = "Bodega no encontrada. Por favor, realizar otra vez el movimiento"
+                elif bodegaOrigen.getNumero() == bodegaDestino:
+                    mensaje = "Bodega de origen no puede ser igual a la bodega de destino.\nPor favor, realizar otra vez el movimiento"
                 else:
                     bodegaOrigen = bodegaOrigen.getNumero()
-                trabajador = findTrabajador(self.trabajador.get()).getId()
-                id = createTraslado(
-                    self.idRegistro,
-                    bodegaOrigen,
-                    bodegaDestino,
-                    trabajador,
-                )
+                    trabajador = findTrabajador(self.trabajador.get()).getId()
+                    id = createTraslado(
+                        self.idRegistro,
+                        bodegaOrigen,
+                        bodegaDestino,
+                        trabajador,
+                    )
 
-                if id:
-                    mensaje = createDetalle(self.listaDetalle, id)
+                    if id:
+                        mensaje = createDetalle(self.listaDetalle, id)
             elif confirmar == "No":
                 mensaje = "No se realizó el movimiento"
             submit(self, mensaje)
