@@ -369,7 +369,7 @@ class Login(ttk.Frame):
                 resu = validarLogin(self.correo.get(), self.pw.get())
                 if resu is not None:
                     if resu.getTerminos() == 0:
-                        mensajeResp = f"""La descarga o utilización de la APP atribuye la condición de  Usuario a quien lo haga e implica la aceptación de todas las condiciones incluidas en este  documento y en la Política de Privacidad y el Aviso Legal de dicha página Web. El Usuario debería leer estas condiciones cada vez que utilice la APP, ya que podrían ser  modificadas en lo sucesivo.\n¿Deseas aceptar los Términos y condiciones?"""
+                        mensajeResp = f"""Términos y Condiciones de Uso\nEstos Términos y Condiciones de Uso regulan las reglas a que se sujeta la utilización de la  APP Inventario de Bodegas (en adelante, la APP), que puede descargarse desde el dominio https://www.inacap.cl \nLa descarga o utilización de la APP atribuye la condición de  Usuario a quien lo haga e implica la aceptación de todas las condiciones incluidas en este  documento y en la Política de Privacidad y el Aviso Legal de dicha página Web. \nEl Usuario debería leer estas condiciones cada vez que utilice la APP, ya que podrían ser  modificadas en lo sucesivo. \n¿Deseas aceptar los Términos y condiciones?"""
                         resp = pregunta(self, mensajeResp)
                         if resp == "No" or resp is None:
                             self.quit()
