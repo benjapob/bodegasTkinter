@@ -3,6 +3,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
+from ttkbootstrap.scrolled import ScrolledText
 from tkinter import PhotoImage
 
 # Import DTO
@@ -104,7 +105,9 @@ def submit(self, mensaje):
 
 
 def pregunta(self, mensaje):
-    resp = Messagebox.show_question(message=mensaje, parent=self, buttons=["No", "Si"])
+    resp = Messagebox.show_question(
+        title="Pregunta", message=mensaje, parent=self, buttons=["No", "Si"]
+    )
     return resp
 
 
@@ -366,9 +369,9 @@ class Login(ttk.Frame):
                 resu = validarLogin(self.correo.get(), self.pw.get())
                 if resu is not None:
                     if resu.getTerminos() == 0:
-                        mensajeResp = f"¿Deseas aceptar los Términos y condiciones?"
+                        mensajeResp = f"""La descarga o utilización de la APP atribuye la condición de  Usuario a quien lo haga e implica la aceptación de todas las condiciones incluidas en este  documento y en la Política de Privacidad y el Aviso Legal de dicha página Web. El Usuario debería leer estas condiciones cada vez que utilice la APP, ya que podrían ser  modificadas en lo sucesivo.\n¿Deseas aceptar los Términos y condiciones?"""
                         resp = pregunta(self, mensajeResp)
-                        if resp == "No":
+                        if resp == "No" or resp is None:
                             self.quit()
                         elif resp == "Si":
                             aceptaTerminos(resu.getId())
@@ -1020,7 +1023,7 @@ class DelProducto(tk.Toplevel):
                 if resp == "Si":
                     mensaje = deleteProducto(self.id.get())
                     self.update_results_view()
-                elif resp == "No":
+                elif resp == "No" or resp is None:
                     mensaje = "No se realizaron cambios"
             else:
                 mensaje = f"No se pudo encontrar el Producto"
@@ -1115,7 +1118,7 @@ class DelBodega(tk.Toplevel):
             )
 
     def on_submit(self):
-        # Valida las entradas y llama la función delProducto()
+        # Valida las entradas y llama la función delBodega()
         if validarInt(self.id.get()):
             buscar = findBodega(self.id.get())
             if buscar:
@@ -1124,7 +1127,7 @@ class DelBodega(tk.Toplevel):
                 if resp == "Si":
                     mensaje = deleteBodega(self.id.get())
                     self.update_results_view()
-                elif resp == "No":
+                elif resp == "No" or resp is None:
                     mensaje = "No se realizaron cambios"
             else:
                 mensaje = f"No se pudo encontrar la Bodega"
@@ -1217,7 +1220,7 @@ class DelEditorial(tk.Toplevel):
                     mensaje = deleteEditorial(self.id.get())
                     self.update_results_view()
                     submit(self, mensaje)
-                elif resp == "No":
+                elif resp == "No" or resp is None:
                     mensaje = "No se realizaron cambios"
                     submit(self, mensaje)
             else:
@@ -1872,7 +1875,7 @@ class MovEntrada(tk.Toplevel):
 
                 if id:
                     mensaje = createDetalle(self.listaDetalle, id)
-            elif confirmar == "No":
+            elif confirmar == "No" or confirmar is None:
                 mensaje = "No se realizó el movimiento"
             submit(self, mensaje)
             self.destroy()
@@ -2047,7 +2050,7 @@ class MovSalida(tk.Toplevel):
 
                 if id:
                     mensaje = createDetalle(self.listaDetalle, id)
-            elif confirmar == "No":
+            elif confirmar == "No" or confirmar is None:
                 mensaje = "No se realizó el movimiento"
             submit(self, mensaje)
             self.destroy()
@@ -2229,7 +2232,7 @@ class MovTraslado(tk.Toplevel):
 
                     if id:
                         mensaje = createDetalle(self.listaDetalle, id)
-            elif confirmar == "No":
+            elif confirmar == "No" or confirmar is None:
                 mensaje = "No se realizó el movimiento"
             submit(self, mensaje)
             self.destroy()
