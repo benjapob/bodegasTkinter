@@ -913,7 +913,7 @@ class CreateEditorial(tk.Toplevel):
         numero = self.numero.get()
         nombre = self.nombre.get()
 
-        if validarStr(numero) and validarStr(nombre):
+        if validarInt(numero) and validarStr(nombre):
             mensaje = createEditorial(numero, nombre)
             self.update_results_view()
 
@@ -1774,7 +1774,7 @@ class MovEntrada(tk.Toplevel):
             "proveedor", self.proveedor, validarStr, self.option_lf
         )
         self.bodegaEntry = self.create_form_entry_combo(
-            "bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
+            "nº bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
         )
 
         # header and labelframe option container
@@ -1946,7 +1946,7 @@ class MovSalida(tk.Toplevel):
             self.option_lf,
         )
         self.bodegaEntry = self.create_form_entry_combo(
-            "bodega origen", self.bodega, validarStr, listaBodega, self.option_lf
+            "nº bodega origen", self.bodega, validarStr, listaBodega, self.option_lf
         )
         self.tiendaEntry = self.create_form_entry(
             "tienda destino", self.tienda, validarStr, self.option_lf
@@ -2121,10 +2121,10 @@ class MovTraslado(tk.Toplevel):
             self.option_lf,
         )
         self.bodegaOrigenEntry = self.create_form_entry(
-            "bodega origen", self.bodegaOrigen, validarInt, self.option_lf
+            "nº bodega origen", self.bodegaOrigen, validarInt, self.option_lf
         )
         self.bodegaEntry = self.create_form_entry_combo(
-            "bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
+            "nº bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
         )
 
         # header and labelframe option container
