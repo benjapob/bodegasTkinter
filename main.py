@@ -137,14 +137,20 @@ def aceptaTerminos(id):
 
 # Funciones DTO-DAO Editorial
 def createEditorial(numero, nombre):
-    """Crea una editorial con un numero y un nombre
-    después irá a la base de datos y creara la editorial"""
+    """Este método debe permitir ingresar los datos de un editorial nueva en la tabla Editorial de la base de datos ProyectoInventario.
+    La base de datos tiene como valores únicos el número y el nombre,
+    si se ingresa un valor duplicado se enviará mensaje respectivo y no permitir el ingreso.
+
+    Retorna un str"""
 
     resultado = EditorialDTO().createEditorial(numero, nombre)
     return resultado
 
 
 def listEditorial():
+    """
+
+    Se retorna una lista"""
     resultado = EditorialDTO().listEditorial()
     return resultado
 
