@@ -3,7 +3,6 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
-from ttkbootstrap.scrolled import ScrolledText
 from tkinter import PhotoImage
 
 # Import DTO
@@ -55,32 +54,10 @@ def validarCorreo(x) -> bool:
         return True
 
 
-def validarRut(x) -> bool:
-    # Valida que el rut exista y que tenga una longitud de 9 o 10 caracteres
-    try:
-        if len(x) >= 9 and len(x) <= 10:
-            return True
-        else:
-            return False
-    except:
-        return False
-
-
 def validarInt(x) -> bool:
     # Valida que el entero no sea menor a cero y que no esté vacío
     try:
         if int(x) > 0:
-            return True
-        else:
-            return False
-    except:
-        return False
-
-
-def validarFloat(x) -> bool:
-    # Valida que el decimal no sea menor a cero y que no esté vacío
-    try:
-        if x > 0:
             return True
         else:
             return False
@@ -671,11 +648,11 @@ class CreateProducto(tk.Toplevel):
         self.resultview.heading(2, text="Autor", anchor=W)
         self.resultview.heading(3, text="Editorial", anchor=W)
         self.resultview.heading(4, text="Categoría", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
-        self.resultview.column(column=3, anchor=W, stretch=False)
-        self.resultview.column(column=4, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+        self.resultview.column(column=2, anchor=W)
+        self.resultview.column(column=3, anchor=W)
+        self.resultview.column(column=4, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -800,8 +777,8 @@ class CreateBodega(tk.Toplevel):
         # setup columns and use `scale_size` to adjust for resolution
         self.resultview.heading(0, text="Numero", anchor=W)
         self.resultview.heading(1, text="Capacidad", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -901,8 +878,8 @@ class CreateEditorial(tk.Toplevel):
         # setup columns and use `scale_size` to adjust for resolution
         self.resultview.heading(0, text="Id", anchor=W)
         self.resultview.heading(1, text="Nombre", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -992,11 +969,11 @@ class DelProducto(tk.Toplevel):
         self.resultview.heading(2, text="Autor", anchor=W)
         self.resultview.heading(3, text="Editorial", anchor=W)
         self.resultview.heading(4, text="Categoría", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
-        self.resultview.column(column=3, anchor=W, stretch=False)
-        self.resultview.column(column=4, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+        self.resultview.column(column=2, anchor=W)
+        self.resultview.column(column=3, anchor=W)
+        self.resultview.column(column=4, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -1097,9 +1074,9 @@ class DelBodega(tk.Toplevel):
         self.resultview.heading(0, text="Id", anchor=W)
         self.resultview.heading(1, text="Numero", anchor=W)
         self.resultview.heading(2, text="Capacidad", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+        self.resultview.column(column=2, anchor=W)
 
         # insert falso
 
@@ -1199,8 +1176,8 @@ class DelEditorial(tk.Toplevel):
         # setup columns and use `scale_size` to adjust for resolution
         self.resultview.heading(0, text="Id", anchor=W)
         self.resultview.heading(1, text="Nombre", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -1362,11 +1339,11 @@ class UpdateProducto(tk.Toplevel):
         self.resultview.heading(2, text="Autor", anchor=W)
         self.resultview.heading(3, text="Editorial", anchor=W)
         self.resultview.heading(4, text="Categoría", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
-        self.resultview.column(column=3, anchor=W, stretch=False)
-        self.resultview.column(column=4, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+        self.resultview.column(column=2, anchor=W)
+        self.resultview.column(column=3, anchor=W)
+        self.resultview.column(column=4, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -1440,12 +1417,12 @@ class SearchInfGeneral(tk.Toplevel):
         self.resultview.heading(3, text="Destino", anchor=W)
         self.resultview.heading(4, text="Tipo", anchor=W)
         self.resultview.heading(5, text="Empleado encargado", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
-        self.resultview.column(column=3, anchor=W, stretch=False)
-        self.resultview.column(column=4, anchor=W, stretch=False)
-        self.resultview.column(column=5, anchor=W, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+        self.resultview.column(column=2, anchor=W)
+        self.resultview.column(column=3, anchor=W)
+        self.resultview.column(column=4, anchor=W)
+        self.resultview.column(column=5, anchor=W)
 
     def update_results_view(self):
         for item in self.resultview.get_children():
@@ -1601,11 +1578,11 @@ class SearchInfBodegaCont(tk.Toplevel):
         self.resultview.heading(2, text="Cantidad", anchor=W)
         self.resultview.heading(3, text="Categoría", anchor=W)
         self.resultview.heading(4, text="Editorial", anchor=W)
-        self.resultview.column(column=0, anchor=W, stretch=False)
-        self.resultview.column(column=1, anchor=W, stretch=False)
-        self.resultview.column(column=2, anchor=W, stretch=False)
-        self.resultview.column(column=3, anchor=W, stretch=False)
-        self.resultview.column(column=4, stretch=False)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+        self.resultview.column(column=2, anchor=W)
+        self.resultview.column(column=3, anchor=W)
+        self.resultview.column(column=4)
 
     def update_results_view(self, resultado):
         for item in self.resultview.get_children():
@@ -1773,7 +1750,7 @@ class MovEntrada(tk.Toplevel):
 
         # form entries
         self.trabajadorEntry = self.create_form_entry_combo(
-            "trabajador\nencargado",
+            "trabajador\nencargado (rut)",
             self.trabajador,
             validarStr,
             listaTrabajador,
@@ -1783,13 +1760,14 @@ class MovEntrada(tk.Toplevel):
             "proveedor", self.proveedor, validarStr, self.option_lf
         )
         self.bodegaEntry = self.create_form_entry_combo(
-            "nº bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
+            "nº bodega\ndestino", self.bodega, validarStr, listaBodega, self.option_lf
         )
 
         # header and labelframe option container
         option_text2 = "Ingresa los Productos"
         self.option_lf2 = ttk.Labelframe(self.option_lf, text=option_text2, padding=15)
         self.option_lf2.pack(fill=X, expand=YES, anchor=N, pady=10)
+
         self.productoEntry = self.create_form_entry_combo(
             "producto", self.producto, validarStr, self.listaProducto, self.option_lf2
         )
@@ -1797,10 +1775,16 @@ class MovEntrada(tk.Toplevel):
             "cantidad", self.cantidad, validarInt, self.option_lf2
         )
 
-        self.create_buttonbox(self.option_lf2, "+", self.on_add, (0))
+        self.create_buttonbox(self.option_lf2, "+", self.on_add, (3))
+
+        # header and labelframe option container
+        hdr_txt = "Lista de Productos"
+        hdr = ttk.Label(master=self.option_lf2, text=hdr_txt, width=50)
+        hdr.pack(fill=X)
 
         self.create_buttonbox(self.option_lf, "Crear", self.on_submit, (15, 10))
         self.mensajeProducto = ""
+        self.create_results_view()
 
     def create_form_entry(self, label, variable, val, parent):
         # Crear una entrada
@@ -1855,6 +1839,37 @@ class MovEntrada(tk.Toplevel):
             width=6,
         )
         sub_btn.pack(side=RIGHT, padx=5)
+
+    def create_results_view(self):
+        """Add result treeview to labelframe"""
+        self.resultview = ttk.Treeview(
+            master=self.option_lf2, bootstyle=INFO, columns=[0, 1], show=HEADINGS
+        )
+        self.resultview.pack(fill=BOTH, expand=YES, pady=10)
+
+        # setup columns and use `scale_size` to adjust for resolution
+        self.resultview.heading(0, text="Producto", anchor=W)
+        self.resultview.heading(1, text="Cantidad", anchor=W)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in self.listaDetalle:
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
+
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a["numeroProducto"],
+                    a["cantidadProducto"],
+                ],
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createEntrada()
@@ -1905,6 +1920,8 @@ class MovEntrada(tk.Toplevel):
 
             submit(self, "Producto añadido correctamente")
 
+            self.update_results_view()
+
         else:
             datosValidos(self)
 
@@ -1948,14 +1965,14 @@ class MovSalida(tk.Toplevel):
 
         # form entries
         self.trabajadorEntry = self.create_form_entry_combo(
-            "trabajador\nencargado",
+            "trabajador\nencargado (rut)",
             self.trabajador,
             validarStr,
             listaTrabajador,
             self.option_lf,
         )
         self.bodegaEntry = self.create_form_entry_combo(
-            "nº bodega origen", self.bodega, validarStr, listaBodega, self.option_lf
+            "nº bodega\norigen", self.bodega, validarStr, listaBodega, self.option_lf
         )
         self.tiendaEntry = self.create_form_entry(
             "tienda destino", self.tienda, validarStr, self.option_lf
@@ -1972,10 +1989,16 @@ class MovSalida(tk.Toplevel):
             "cantidad", self.cantidad, validarInt, self.option_lf2
         )
 
-        self.create_buttonbox(self.option_lf2, "+", self.on_add, (0))
+        self.create_buttonbox(self.option_lf2, "+", self.on_add, (3))
+
+        # header and labelframe option container
+        hdr_txt = "Lista de Productos"
+        hdr = ttk.Label(master=self.option_lf2, text=hdr_txt, width=50)
+        hdr.pack(fill=X)
 
         self.create_buttonbox(self.option_lf, "Crear", self.on_submit, (15, 10))
         self.mensajeProducto = ""
+        self.create_results_view()
 
     def create_form_entry(self, label, variable, val, parent):
         # Crear una entrada
@@ -2030,6 +2053,37 @@ class MovSalida(tk.Toplevel):
             width=6,
         )
         sub_btn.pack(side=RIGHT, padx=5)
+
+    def create_results_view(self):
+        """Add result treeview to labelframe"""
+        self.resultview = ttk.Treeview(
+            master=self.option_lf2, bootstyle=INFO, columns=[0, 1], show=HEADINGS
+        )
+        self.resultview.pack(fill=BOTH, expand=YES, pady=10)
+
+        # setup columns and use `scale_size` to adjust for resolution
+        self.resultview.heading(0, text="Producto", anchor=W)
+        self.resultview.heading(1, text="Cantidad", anchor=W)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in self.listaDetalle:
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
+
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a["numeroProducto"],
+                    a["cantidadProducto"],
+                ],
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createSalida()
@@ -2079,7 +2133,7 @@ class MovSalida(tk.Toplevel):
             self.productoEntry.set("")
 
             submit(self, "Producto añadido correctamente")
-
+            self.update_results_view()
         else:
             datosValidos(self)
 
@@ -2123,17 +2177,17 @@ class MovTraslado(tk.Toplevel):
 
         # form entries
         self.trabajadorEntry = self.create_form_entry_combo(
-            "trabajador\nencargado",
+            "trabajador\nencargado (rut)",
             self.trabajador,
             validarStr,
             listaTrabajador,
             self.option_lf,
         )
         self.bodegaOrigenEntry = self.create_form_entry(
-            "nº bodega origen", self.bodegaOrigen, validarInt, self.option_lf
+            "nº bodega\norigen", self.bodegaOrigen, validarInt, self.option_lf
         )
         self.bodegaEntry = self.create_form_entry_combo(
-            "nº bodega destino", self.bodega, validarStr, listaBodega, self.option_lf
+            "nº bodega\ndestino", self.bodega, validarStr, listaBodega, self.option_lf
         )
 
         # header and labelframe option container
@@ -2147,10 +2201,16 @@ class MovTraslado(tk.Toplevel):
             "cantidad", self.cantidad, validarInt, self.option_lf2
         )
 
-        self.create_buttonbox(self.option_lf2, "+", self.on_add, (0))
+        self.create_buttonbox(self.option_lf2, "+", self.on_add, (3))
+
+        # header and labelframe option container
+        hdr_txt = "Lista de Productos"
+        hdr = ttk.Label(master=self.option_lf2, text=hdr_txt, width=50)
+        hdr.pack(fill=X)
 
         self.create_buttonbox(self.option_lf, "Crear", self.on_submit, (15, 10))
         self.mensajeProducto = ""
+        self.create_results_view()
 
     def create_form_entry(self, label, variable, val, parent):
         # Crear una entrada
@@ -2205,6 +2265,37 @@ class MovTraslado(tk.Toplevel):
             width=6,
         )
         sub_btn.pack(side=RIGHT, padx=5)
+
+    def create_results_view(self):
+        """Add result treeview to labelframe"""
+        self.resultview = ttk.Treeview(
+            master=self.option_lf2, bootstyle=INFO, columns=[0, 1], show=HEADINGS
+        )
+        self.resultview.pack(fill=BOTH, expand=YES, pady=10)
+
+        # setup columns and use `scale_size` to adjust for resolution
+        self.resultview.heading(0, text="Producto", anchor=W)
+        self.resultview.heading(1, text="Cantidad", anchor=W)
+        self.resultview.column(column=0, anchor=W)
+        self.resultview.column(column=1, anchor=W)
+
+    def update_results_view(self):
+        for item in self.resultview.get_children():
+            self.resultview.delete(item)
+        for a in self.listaDetalle:
+            iid = self.resultview.insert(
+                parent="",
+                index=END,
+            )
+
+            self.resultview.item(
+                iid,
+                open=True,
+                values=[
+                    a["numeroProducto"],
+                    a["cantidadProducto"],
+                ],
+            )
 
     def on_submit(self):
         # Valida las entradas y llama la función createSalida()
@@ -2261,6 +2352,7 @@ class MovTraslado(tk.Toplevel):
             self.productoEntry.set("")
 
             submit(self, "Producto añadido correctamente")
+            self.update_results_view()
 
         else:
             datosValidos(self)
