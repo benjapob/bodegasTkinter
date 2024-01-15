@@ -2,8 +2,6 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from ttkbootstrap.dialogs import Messagebox
-from tkinter import PhotoImage
 
 # Import DTO
 from dto.dto_tr import TrDTO
@@ -13,6 +11,8 @@ from dto.dto_producto import ProductoDTO
 from dto.dto_categoria import CategoriaDTO
 from dto.dto_registro import RegistroDTO
 from dto.dto_detalle import DetalleDTO
+
+import re
 
 
 # Funciones tkinter
@@ -47,11 +47,12 @@ def validarStr(x) -> bool:
 
 
 def validarCorreo(x) -> bool:
-    # Valida que el input tenga un @
-    if "@" not in x:
-        return False
-    else:
+    # Valida que el input sea un mail
+    regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
+    if re.fullmatch(regex, x):
         return True
+    else:
+        return False
 
 
 def validarInt(x) -> bool:
@@ -68,13 +69,13 @@ def validarInt(x) -> bool:
 # Advertencias
 def datosValidos(self):
     # Muestra una alerta con el siguiente texto
-    Messagebox.show_warning(
+    ttk.dialogs.Messagebox.show_warning(
         f"Por favor, ingresa datos válidos", "Advertencia", alert=True, parent=self
     )
 
 
 def submit(self, mensaje):
-    Messagebox.show_info(
+    ttk.dialogs.Messagebox.show_info(
         title="Aviso",
         message=mensaje,
         parent=self,
@@ -82,7 +83,7 @@ def submit(self, mensaje):
 
 
 def pregunta(self, mensaje):
-    resp = Messagebox.show_question(
+    resp = ttk.dialogs.Messagebox.show_question(
         title="Pregunta", message=mensaje, parent=self, buttons=["No", "Si"]
     )
     return resp
@@ -283,6 +284,14 @@ def listDetalle(bodega, numeroProducto):
 
 
 # Ventanas de la aplicación
+def main():
+    login = ttk.Window("Librería el Gran Poeta", "superhero", resizable=(False, False))
+
+    place_window_center(login)
+    Login(login)
+    login.mainloop()
+
+
 class Login(ttk.Frame):
     def __init__(self, master):
         super().__init__(master, padding=(20, 10))
@@ -374,13 +383,13 @@ class Login(ttk.Frame):
                 else:
                     self.intentos += 1
                     if self.intentos == 4:
-                        Messagebox.show_error(
+                        ttk.dialogs.Messagebox.show_error(
                             f"Demasiados intentos fallidos", "Error", alert=True
                         )
                         # Cierra la aplicación
                         self.quit()
                     else:
-                        Messagebox.show_warning(
+                        ttk.dialogs.Messagebox.show_warning(
                             f"Correo o contraseña incorrecta, intentos restantes: {4 - self.intentos}",
                             "Advertencia",
                             alert=True,
@@ -388,7 +397,9 @@ class Login(ttk.Frame):
 
             except Exception as es:
                 print(es)
-                Messagebox.show_error(f"Intentar nuevamente", "Error", alert=True)
+                ttk.dialogs.Messagebox.show_error(
+                    f"Intentar nuevamente", "Error", alert=True
+                )
         else:
             datosValidos(self)
 
@@ -453,7 +464,7 @@ class MenuJefe(tk.Toplevel):
 
     def create_buttonbox(self, container, title, command, img):
         # Crear los botones
-        button = PhotoImage(file=f"img/{img}.png")
+        button = tk.PhotoImage(file=f"img/{img}.png")
         # button = button.subsample(2, 2)
         menuBtn = ttk.Button(
             master=container,
@@ -536,7 +547,7 @@ class CreateProducto(tk.Toplevel):
             listaEditorial.append(a.getNombre())
 
         if len(listaEditorial) == 0:
-            Messagebox.show_warning(
+            ttk.dialogs.Messagebox.show_warning(
                 message="No hay editoriales ingresadas\nPor favor, ingresa una editorial",
                 parent=self,
             )
@@ -1223,7 +1234,7 @@ class UpdateProducto(tk.Toplevel):
             listaEditorial.append(a.getNombre())
 
         if len(listaEditorial) == 0:
-            Messagebox.show_warning(
+            ttk.dialogs.Messagebox.show_warning(
                 message="No hay editoriales ingresadas\nPor favor, ingresa una editorial",
                 parent=self,
             )
@@ -1667,7 +1678,7 @@ class MenuBodeguero(tk.Toplevel):
 
     def create_buttonbox(self, container, title, command, img):
         # Crear los botones
-        button = PhotoImage(file=f"img/{img}.png")
+        button = tk.PhotoImage(file=f"img/{img}.png")
         # button = button.subsample(2, 2)
         menuBtn = ttk.Button(
             master=container,
@@ -2359,8 +2370,4 @@ class MovTraslado(tk.Toplevel):
 
 
 if __name__ == "__main__":
-    login = ttk.Window("Librería el Gran Poeta", "superhero", resizable=(False, False))
-
-    place_window_center(login)
-    Login(login)
-    login.mainloop()
+    main()
