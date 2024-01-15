@@ -2,9 +2,11 @@
 
 Proyecto final para el taller de aplicaciones año 2022.
 
-Usa el patrón de arquitectura MVC DAO-DTO
+Usa el patrón de arquitectura MVC DAO-DTO.
 
 ## Instalación
+
+Crea la base de datos con el script de sql bodegasTk.sql
     
 Ejecuta el main.exe o corre desde el main.py
 
@@ -14,6 +16,6 @@ Ejecuta el main.exe o corre desde el main.py
 * MySql  
   
 ## Screenshots : 
-<img src="static/img/preview/front1.png" height="400" width="800">
-<img src="static/img/preview/front2.png" height="400" width="800">
+<img src="img/preview/front1.png" height="400" width="800">
+<img src="img/preview/front2.png" height="400" width="800">
 
