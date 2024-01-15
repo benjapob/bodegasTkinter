@@ -12,4 +12,8 @@ Ejecuta el main.exe o corre desde el main.py
 * Python
 * Tkinter
 * MySql  
+  
+## Screenshots : 
+<img src="static/img/preview/front1.png" height="400" width="800">
+<img src="static/img/preview/front2.png" height="400" width="800">
 
