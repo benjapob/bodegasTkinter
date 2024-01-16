@@ -16,6 +16,6 @@ Ejecuta el main.exe o corre desde el main.py
 * MySql  
   
 ## Screenshots : 
-<img src="img/preview/front1.png" height="550" width="800">
+<img src="img/preview/front1.png" height="550" width="650">
 <img src="img/preview/front2.png" height="550" width="800">
 
